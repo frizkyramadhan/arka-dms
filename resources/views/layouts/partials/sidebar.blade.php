@@ -26,8 +26,8 @@
       </li>
       <li class="menu-header">Administrator</li>
       <li>
-        <a class="nav-link" href="blank.html"><i class="fas fa-building"></i>
-          <span>Company</span>
+        <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
+          <span>Company Settings</span>
         </a>
         <a class="nav-link" href="blank.html"><i class="fas fa-users"></i>
           <span>Users</span>
