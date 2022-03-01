@@ -29,10 +29,10 @@
         <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
           <span>Company Settings</span>
         </a>
-        <a class="nav-link" href="blank.html"><i class="fas fa-users"></i>
+        <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
           <span>Users</span>
         </a>
-        <a class="nav-link" href="blank.html"><i class="fas fa-project-diagram"></i>
+        <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
           <span>Project</span>
         </a>
       </li>

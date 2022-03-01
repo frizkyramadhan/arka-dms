@@ -14,7 +14,11 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        //
+        $title = 'Projects';
+        $subtitle = 'Project Data';
+        $projects = Project::orderBy('project_code', 'asc')->get();
+        return view('projects.index', compact('title','subtitle','projects'));
+
     }
 
     /**
@@ -24,7 +28,10 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        // create project
+        $title = 'Projects';
+        $subtitle = 'Add Project Data';
+        return view('projects.create', compact('title','subtitle'));
     }
 
     /**
@@ -35,7 +42,16 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // store project with validation
+        $request->validate([
+            'project_code' => 'required',
+            'project_name' => 'required',
+        ]);
+        
+        // store project with erm
+        Project::create($request->all());
+        return redirect('projects')->with('status', 'Project created successfully');
+
     }
 
     /**
@@ -57,7 +73,11 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        // edit project
+        $title = 'Projects';
+        $subtitle = 'Edit Project Data';
+        return view('projects.edit', compact('title','subtitle','project'));
+
     }
 
     /**
@@ -69,7 +89,16 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        // update project with validation
+        $request->validate([
+            'project_code' => 'required',
+            'project_name' => 'required',
+        ]);
+        Project::where('id', $project->id)->update([
+            'project_code' => $request->project_code,
+            'project_name' => $request->project_name,
+        ]);
+        return redirect('projects')->with('status', 'Project updated successfully');
     }
 
     /**
@@ -80,6 +109,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        // delete project
+        Project::destroy($project->id);
+        return redirect('projects')->with('status', 'Project deleted successfully');
     }
 }

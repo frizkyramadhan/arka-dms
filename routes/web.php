@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,4 +25,4 @@ Route::post('companies', [CompanyController::class, 'store'])->name('companies.s
 Route::put('companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
 Route::delete('companies/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
 
-
+Route::resource('projects', ProjectController::class)->except(['show']);
