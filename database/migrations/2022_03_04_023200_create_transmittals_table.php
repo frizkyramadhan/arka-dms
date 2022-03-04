@@ -17,6 +17,7 @@ class CreateTransmittalsTable extends Migration
             $table->id();
             $table->string('receipt_no');
             $table->date('receipt_date');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('project_id')->references('id')->on('projects');
             $table->string('to');
             $table->string('attn');
