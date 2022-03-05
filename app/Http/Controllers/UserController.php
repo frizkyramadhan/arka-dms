@@ -19,7 +19,7 @@ class UserController extends Controller
     {
         $title = 'Users';
         $subtitle = 'Users Data';
-        $users = User::orderBy('full_name', 'asc')->get();
+        $users = User::with('project')->orderBy('full_name', 'asc')->get();
         return view('users.index', compact('title', 'subtitle', 'users'));
     }
 
