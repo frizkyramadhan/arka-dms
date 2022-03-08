@@ -62,7 +62,6 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
-
                   <div class="form-group">
                     <label>Project</label>
                     <select class="form-control @error('project_id') is-invalid @enderror" name="project_id">
@@ -77,6 +76,7 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
+                  <input type="hidden" class="form-control" name="level" value="user">
                   <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-lg btn-block">
                       Register

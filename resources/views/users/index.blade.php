@@ -29,6 +29,7 @@
                       <th>Full Name</th>
                       <th>Email</th>
                       <th>Project</th>
+                      <th>Role</th>
                       <th class="text-center">Action</th>
                     </tr>
                   </thead>
@@ -39,6 +40,7 @@
                         <td>{{ $user->full_name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->project->project_code }}</td>
+                        <td>{{ $user->level }}</td>
                         <td class="text-center">
                           <a href="{{ url('users/' . $user->id . '/edit') }}" class="btn btn-icon btn-primary"><i
                               class="far fa-edit"></i></a>

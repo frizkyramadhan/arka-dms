@@ -31,13 +31,15 @@ Route::middleware('auth')->group(function(){
     Route::get('/', function () {
         return view('home');
     });
-    // route company
+});
+
+Route::middleware('admin')->group(function(){
     Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');
     Route::post('companies', [CompanyController::class, 'store'])->name('companies.store');
     Route::put('companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
     Route::delete('companies/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
-    
+        
     Route::resource('projects', ProjectController::class)->except(['show']);
 
-    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('users', UserController::class)->except(['show'])->middleware('admin');
 });

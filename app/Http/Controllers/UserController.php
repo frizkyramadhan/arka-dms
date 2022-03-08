@@ -17,6 +17,10 @@ class UserController extends Controller
      */
     public function index()
     {
+        // if(auth()->user()->level != 'administrator') {
+        //     return view('errors.403');
+        // }
+
         $title = 'Users';
         $subtitle = 'Users Data';
         $users = User::with('project')->orderBy('full_name', 'asc')->get();
@@ -49,6 +53,7 @@ class UserController extends Controller
             'email' => 'required|email:dns|unique:users|ends_with:@arka.co.id',
             'password' => 'required|min:5',
             'project_id' => 'required',
+            'level' => 'required'
         ],[
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',

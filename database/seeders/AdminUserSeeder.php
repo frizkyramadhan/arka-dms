@@ -15,9 +15,10 @@ class AdminUserSeeder extends Seeder
     public function run()
     {
         User::create([
-            'full_name' => 'Super Admin',
-            'email' => 'superadmin@arka-doc.dev',
-            'password' => bcrypt('superadmin'),
+            'full_name' => 'Administrator',
+            'email' => 'administrator@arka-doc.dev',
+            'password' => bcrypt('admin'),
+            'level' => 'administrator',
             'project_id' => 1
         ]);
     }

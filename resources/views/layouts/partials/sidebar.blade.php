@@ -22,21 +22,23 @@
           <span>Tracking</span>
         </a>
       </li>
-      <li class="menu-header">Administrator</li>
-      <li class="{{ Request::is('companies*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
-          <span>Company Settings</span>
-        </a>
-      </li>
-      <li class="{{ Request::is('users*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
-          <span>Users</span>
-        </a>
-      </li>
-      <li class="{{ Request::is('projects*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
-          <span>Project</span>
-        </a>
-      </li>
+      @can('admin')
+        <li class="menu-header">Administrator</li>
+        <li class="{{ Request::is('companies*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
+            <span>Company Settings</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('users*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
+            <span>Users</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('projects*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
+            <span>Project</span>
+          </a>
+        </li>
+      @endcan
   </aside>
 </div>

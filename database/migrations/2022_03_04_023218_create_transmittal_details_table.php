@@ -15,7 +15,7 @@ class CreateTransmittalDetailsTable extends Migration
     {
         Schema::create('transmittal_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transmittal_id')->references('id')->on('transmittals');
+            $table->foreignUuid('transmittal_id')->references('id')->on('transmittals');
             $table->string('qty');
             $table->string('title');
             $table->string('remarks');
