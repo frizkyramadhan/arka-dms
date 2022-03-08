@@ -8,7 +8,7 @@
     </div>
     <ul class="sidebar-menu">
       <li class="menu-header">Dashboard</li>
-      <li class="dropdown">
+      <li class="{{ Request::is('/') ? 'active' : '' }}">
         <a href="{{ url('/') }}" class="nav-link"><i class="fas fa-fire"></i><span>Dashboard</span></a>
       </li>
       <li class="menu-header">Transmittal Forms</li>
@@ -16,21 +16,29 @@
         <a class="nav-link" href="blank.html"><i class="fas fa-file-alt"></i>
           <span>Transmittal Forms</span>
         </a>
+      </li>
+      <li>
         <a class="nav-link" href="blank.html"><i class="fas fa-search-location"></i>
           <span>Tracking</span>
         </a>
       </li>
-      <li class="menu-header">Administrator</li>
-      <li>
-        <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
-          <span>Company Settings</span>
-        </a>
-        <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
-          <span>Users</span>
-        </a>
-        <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
-          <span>Project</span>
-        </a>
-      </li>
+      @can('admin')
+        <li class="menu-header">Administrator</li>
+        <li class="{{ Request::is('companies*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
+            <span>Company Settings</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('users*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
+            <span>Users</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('projects*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
+            <span>Project</span>
+          </a>
+        </li>
+      @endcan
   </aside>
 </div>

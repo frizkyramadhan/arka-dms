@@ -14,9 +14,10 @@ class CreateTransmittalsTable extends Migration
     public function up()
     {
         Schema::create('transmittals', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('receipt_no');
             $table->date('receipt_date');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('project_id')->references('id')->on('projects');
             $table->string('to');
             $table->string('attn');

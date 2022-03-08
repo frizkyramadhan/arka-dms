@@ -24,6 +24,7 @@ class RegisterController extends Controller
             'email' => 'required|email:dns|unique:users|ends_with:@arka.co.id',
             'password' => 'required|min:5',
             'project_id' => 'required',
+            'level' => 'required'
         ],[
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
