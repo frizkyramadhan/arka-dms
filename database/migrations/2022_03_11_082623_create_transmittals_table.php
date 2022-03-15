@@ -15,16 +15,18 @@ class CreateTransmittalsTable extends Migration
     {
         Schema::create('transmittals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('receipt_no');
+            $table->foreignId('series_id')->nullable()->references('id')->on('series');
+            $table->integer('receipt_no');
+            $table->string('receipt_full_no')->nullable();
             $table->date('receipt_date');
             $table->foreignId('user_id')->references('id')->on('users');
-            $table->foreignId('project_id')->references('id')->on('projects');
-            $table->string('to');
-            $table->string('attn');
-            $table->string('received_by');
-            $table->time('received_time');
-            $table->date('received_date');
-            $table->string('status');
+            $table->foreignId('project_id')->nullable()->references('id')->on('projects');
+            $table->string('to')->nullable();
+            $table->string('attn')->nullable();
+            $table->string('received_by')->nullable();
+            $table->time('received_time')->nullable();
+            $table->date('received_date')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

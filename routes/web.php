@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\SeriesController;
 use PHPUnit\TextUI\XmlConfiguration\Group;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\TransmittalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +33,7 @@ Route::middleware('auth')->group(function(){
     Route::get('/', function () {
         return view('home');
     });
+    Route::resource('transmittals', TransmittalController::class);
 });
 
 Route::middleware('admin')->group(function(){
@@ -40,6 +43,7 @@ Route::middleware('admin')->group(function(){
     Route::delete('companies/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
         
     Route::resource('projects', ProjectController::class)->except(['show']);
+    Route::resource('series', SeriesController::class)->except(['show']);
 
     Route::resource('users', UserController::class)->except(['show'])->middleware('admin');
 });

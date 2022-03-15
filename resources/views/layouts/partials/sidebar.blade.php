@@ -12,8 +12,8 @@
         <a href="{{ url('/') }}" class="nav-link"><i class="fas fa-fire"></i><span>Dashboard</span></a>
       </li>
       <li class="menu-header">Transmittal Forms</li>
-      <li>
-        <a class="nav-link" href="blank.html"><i class="fas fa-file-alt"></i>
+      <li class="{{ Request::is('transmittals*') ? 'active' : '' }}">
+        <a class=" nav-link" href="{{ url('transmittals') }}"><i class="fas fa-file-alt"></i>
           <span>Transmittal Forms</span>
         </a>
       </li>
@@ -27,6 +27,11 @@
         <li class="{{ Request::is('companies*') ? 'active' : '' }}">
           <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
             <span>Company Settings</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('series*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('series') }}"><i class="fas fa-hashtag"></i>
+            <span>Series</span>
           </a>
         </li>
         <li class="{{ Request::is('users*') ? 'active' : '' }}">

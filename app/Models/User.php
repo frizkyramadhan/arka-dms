@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Project;
+use App\Models\Transmittal;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -48,5 +49,10 @@ class User extends Authenticatable
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function transmittal()
+    {
+        return $this->hasMany(Transmittal::class);
     }
 }
