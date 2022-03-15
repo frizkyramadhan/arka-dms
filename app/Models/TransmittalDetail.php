@@ -2,24 +2,18 @@
 
 namespace App\Models;
 
-use App\Models\User;
 use App\Models\Transmittal;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Project extends Model
+class TransmittalDetail extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
-
-    public function user()
-    {
-        return $this->hasMany(User::class);
-    }
+    protected $fillable = ['transmittal_id','qty','title','remarks'];
 
     public function transmittal()
     {
-        return $this->hasMany(Transmittal::class);
+        return $this->belongsTo(Transmittal::class);
     }
 }
