@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-// use Datatables;
-use App\Models\Series;
 use App\Models\Project;
 use App\Models\Transmittal;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use App\Models\TransmittalDetail;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Contracts\Validation\Rule;
-use Yajra\DataTables\DataTables as DataTablesDataTables;
 
 class TransmittalController extends Controller
 {
@@ -33,10 +28,8 @@ class TransmittalController extends Controller
     public function getTransmittals(Request $request)
     {
         if($request->ajax()){
-            $transmittals = Transmittal::with(['project'])->latest()->orderBy('receipt_no', 'desc')->get();
-            // dd($transmittals);
-            // $transmittals = Transmittal::join('projects', 'transmittals.project_id', '=', 'projects.id')
-            //     ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_full_no', 'desc');
+            $transmittals = Transmittal::join('projects', 'transmittals.project_id', '=', 'projects.id')
+                ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_full_no', 'desc');
             return DataTables::of($transmittals)
                 ->addIndexColumn()
                 ->addColumn('receipt_full_no', function($transmittals){
@@ -64,14 +57,19 @@ class TransmittalController extends Controller
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';
                     }
                 })
-                // ->filter(function ($instance) use ($request) {
-                //     if (!empty($request->get('search'))) {
-                //             $instance->where(function($w) use($request){
-                //             $search = $request->get('search');
-                //             $w->orWhere('receipt_full_no', 'LIKE', "%$search%");
-                //         });
-                //     }
-                // })
+                ->filter(function ($instance) use ($request) {
+                    if (!empty($request->get('search'))) {
+                            $instance->where(function($w) use($request){
+                            $search = $request->get('search');
+                            $w->orWhere('receipt_full_no', 'LIKE', "%$search%")
+                            ->orWhere('receipt_date', 'LIKE', "%$search%")
+                            ->orWhere('project_code', 'LIKE', "%$search%")
+                            ->orWhere('to', 'LIKE', "%$search%")
+                            ->orWhere('attn', 'LIKE', "%$search%")
+                            ->orWhere('status', 'LIKE', "%$search%");
+                        });
+                    }
+                })
                 ->addColumn('action', 'transmittals.action')
                 ->rawColumns(['status','action'])
                 ->toJson();

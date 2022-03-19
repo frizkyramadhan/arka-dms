@@ -137,9 +137,9 @@
         serverSide: true,
         ajax: {
           url: "{{ route('transmittals.list') }}",
-          // data: function(d) {
-          //   d.search = $('input[type="search"]').val()
-          // }
+          data: function(d) {
+            d.search = $('input[type="search"]').val()
+          }
         },
         columns: [{
             data: 'DT_RowIndex',
