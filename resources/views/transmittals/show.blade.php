@@ -4,6 +4,17 @@
   <section class="section">
     <div class="section-header">
       <h1>{{ $title }}</h1>
+      <div class="section-header-button">
+        @if (empty($transmittal->deleted_at))
+          <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i
+              class="fas fa-arrow-alt-circle-left"></i>
+            Back</a>
+        @else
+          <a href="{{ url('transmittals/trash') }}" class="btn btn-icon btn-primary"><i
+              class="fas fa-arrow-alt-circle-left"></i>
+            Back</a>
+        @endif
+      </div>
     </div>
     <div class="section-body">
       <div class="invoice">
@@ -86,8 +97,10 @@
         <hr>
         <div class="text-md-right">
           <div class="float-lg-left mb-lg-0 mb-3">
-            <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit"
-              class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
+            @if (empty($transmittal->deleted_at))
+              <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit"
+                class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
+            @endif
           </div>
           <button class="btn btn-primary btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
         </div>

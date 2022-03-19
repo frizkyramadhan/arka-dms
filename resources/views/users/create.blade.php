@@ -4,6 +4,10 @@
   <section class="section">
     <div class="section-header">
       <h1>{{ $title }}</h1>
+      <div class="section-header-button">
+        <a href="{{ url('users') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
+          Back</a>
+      </div>
     </div>
     <div class="section-body">
       <div class="row">

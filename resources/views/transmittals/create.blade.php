@@ -4,6 +4,10 @@
   <section class="section">
     <div class="section-header">
       <h1>{{ $title }}</h1>
+      <div class="section-header-button">
+        <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
+          Back</a>
+      </div>
     </div>
     <form action="{{ url('transmittals') }}" method="POST">
       <div class="section-body">

@@ -23,9 +23,6 @@ class CreateTransmittalsTable extends Migration
             $table->foreignId('project_id')->nullable()->references('id')->on('projects');
             $table->string('to')->nullable();
             $table->string('attn')->nullable();
-            $table->string('received_by')->nullable();
-            $table->time('received_time')->nullable();
-            $table->date('received_date')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
