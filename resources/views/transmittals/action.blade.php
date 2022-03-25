@@ -1,5 +1,5 @@
-<a href="" class="btn btn-icon btn-info" title="Send" data-toggle="modal"
-  data-target="#exampleModal-{{ $model->id }}"><i class="fas fa-paper-plane"></i></a>
+<a href="{{ url('trackings?search=' . $model->receipt_full_no) }}" class="btn btn-icon btn-light" title="Track"><i
+    class="fas fa-search-location"></i></a>
 <a href="{{ url('transmittals/' . $model->id) }}" class="btn btn-icon btn-primary" title="Detail"><i
     class="fas fa-info-circle"></i></a>
 <a href="{{ url('transmittals/' . $model->id . '/edit') }}" title="Edit" class="btn btn-icon btn-warning"><i

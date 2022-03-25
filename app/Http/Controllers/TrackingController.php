@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Delivery;
 use App\Models\Tracking;
+use App\Models\Transmittal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TrackingController extends Controller
 {
@@ -12,14 +15,28 @@ class TrackingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $title = "Tracking Transmittals";
         $subtitle = "Track Your Transmittals";
-        $trackings = Tracking::with('user')->latest()->filter(request(['search']))->get();
-
-        return view('trackings.index', compact('title', 'subtitle', 'trackings'));
+        
+        $trackings = DB::table('deliveries')
+            ->leftJoin('transmittals', 'transmittals.id', '=', 'deliveries.transmittal_id')
+            ->leftJoin('users', 'users.id', '=', 'transmittals.user_id')
+            ->select('deliveries.*', 'transmittals.receipt_full_no', 'users.full_name')
+            ->when($request->search, function($query) use ($request){
+            return $query->where('transmittals.receipt_full_no', 'like', '%'.$request->search.'%');
+            })
+            ->orderBy('id', 'desc')->get();
+        
+        return view('trackings.index', compact('title', 'subtitle', 'trackings','request'));
     }
+
+    // public function json_trackings()
+    // {
+    //     $trackings = Transmittal::with('deliveries')->get();
+    //     return response()->json($trackings);
+    // }
 
     /**
      * Show the form for creating a new resource.

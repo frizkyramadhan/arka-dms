@@ -38,4 +38,9 @@ class Transmittal extends Model
     {
         return $this->hasMany(TransmittalDetail::class);
     }
+
+    public function deliveries()
+    {
+        return $this->hasMany(Delivery::class);
+    }
 }

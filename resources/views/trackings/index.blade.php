@@ -20,11 +20,11 @@
                   {{ session('success') }}
                 </div>
               @endif
-              <form action="trackings">
+              <form action="{{ url()->current() }}" method="get">
                 <div class="form-group">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Transmittal No." aria-label="" name="search"
-                      value="{{ request('search') }}">
+                    <input id="search" type="text" class="form-control" placeholder="Transmittal No." name="search"
+                      value="{{ request('search') }}" autofocus autocomplete="off">
                     <div class="input-group-append">
                       <button class="btn btn-primary" type="submit">Search</button>
                     </div>
@@ -35,54 +35,52 @@
           </div>
         </div>
         <div class="col-md-8">
-          <form id="setting-form">
-            <div class="card" id="settings-card">
-              <div class="card-header">
-                <h4>Results</h4>
-              </div>
-              <div class="card-body">
-                <div class="activities">
-                  @if (!empty($trackings->count()))
-                    @foreach ($trackings as $tracking)
-                      <div class="activity">
-                        @if ($tracking->tracking_status == 'send')
-                          <div class="activity-icon bg-info text-white shadow-info">
-                            <i class="fas fa-paper-plane"></i>
-                          </div>
-                        @elseif ($tracking->tracking_status == 'receive')
-                          <div class="activity-icon bg-success text-white shadow-success">
-                            <i class="fas fa-check"></i>
-                          </div>
-                        @endif
-                        <div class="activity-detail">
-                          <div class="mb-2">
-                            <span class="bullet"></span>
-                            <span class="text-job">{{ $tracking->tracking_status }} by
-                              {{ $tracking->user->full_name }} at
-                              {{ date('d-M-Y - H:m', strtotime($tracking->tracking_date)) }}</span>
-                            <span class="bullet"></span>
-                          </div>
-                          <p>{{ $tracking->tracking_remarks }}</p>
+          <div class="card" id="settings-card">
+            <div class="card-header">
+              <h4>Results</h4>
+            </div>
+            <div class="card-body">
+              <div class="activities">
+                @if ($request->search)
+                  @foreach ($trackings as $tracking)
+                    <div class="activity">
+                      @if ($tracking->delivery_status == 'send')
+                        <div class="activity-icon bg-info text-white shadow-info">
+                          <i class="fas fa-paper-plane"></i>
                         </div>
-                      </div>
-                    @endforeach
-                  @else
-                    <div class="col-12">
-                      <div class="empty-state" data-height="200">
-                        <div class="empty-state-icon">
-                          <i class="fas fa-question"></i>
+                      @elseif ($tracking->delivery_status == 'receive')
+                        <div class="activity-icon bg-success text-white shadow-success">
+                          <i class="fas fa-check"></i>
                         </div>
-                        <h2>We couldn't find any data</h2>
-                        <p class="lead">
-                          Sorry we can't find any data, please try again.
-                        </p>
+                      @endif
+                      <div class="activity-detail">
+                        <div class="mb-2">
+                          <span class="bullet"></span>
+                          <span class="text-job">{{ $tracking->delivery_status }} by
+                            {{ $tracking->full_name }} at
+                            {{ date('d-M-Y - H:m', strtotime($tracking->delivery_date)) }}</span>
+                          <span class="bullet"></span>
+                        </div>
+                        <p>{{ $tracking->delivery_remarks }}</p>
                       </div>
                     </div>
-                  @endif
-                </div>
+                  @endforeach
+                @else
+                  <div class="col-12">
+                    <div class="empty-state" data-height="200">
+                      <div class="empty-state-icon">
+                        <i class="fas fa-question"></i>
+                      </div>
+                      <h2>We couldn't find any data</h2>
+                      <p class="lead">
+                        Sorry we can't find any data, please try again.
+                      </p>
+                    </div>
+                  </div>
+                @endif
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
