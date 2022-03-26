@@ -8,6 +8,7 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\TransmittalController;
 
 /*
@@ -31,9 +32,24 @@ Route::post('logout', [LoginController::class, 'logout']);
 
 Route::middleware('auth')->group(function(){
     Route::get('/', function () {
-        return view('home');
+        return view('home' , ['title' => 'Dashboard']);
     });
+    Route::get('transmittals/data', [TransmittalController::class, 'data'])->name('transmittals.data');
+    Route::get('transmittals/list', [TransmittalController::class, 'getTransmittals'])->name('transmittals.list');
+    Route::get('transmittals/trash', [TransmittalController::class, 'trash'])->middleware('admin');
+    Route::get('transmittals/restore/{id?}', [TransmittalController::class, 'restore'])->middleware('admin');
+    Route::get('transmittals/delete/{id?}', [TransmittalController::class, 'delete'])->middleware('admin');
+    Route::get('transmittals/print/{id?}', [TransmittalController::class, 'print']);
+    Route::post('transmittals/{id?}/delivery', [TransmittalController::class, 'add_delivery']);
+    Route::put('transmittals/{transmittal_id?}/delivery/{id?}', [TransmittalController::class, 'edit_delivery']);
+    Route::get('transmittals/{transmittal_id?}/delivery/delete/{id?}', [TransmittalController::class, 'delete_delivery']);
     Route::resource('transmittals', TransmittalController::class);
+
+    // route tracking transmittal
+    Route::get('/trackings', [TrackingController::class, 'index'])->name('trackings.index');
+    Route::get('/trackings/json', [TrackingController::class, 'json_trackings'])->name('trackings.json');
+    // Route::resource('trackings', TrackingController::class);
+
 });
 
 Route::middleware('admin')->group(function(){
@@ -45,5 +61,6 @@ Route::middleware('admin')->group(function(){
     Route::resource('projects', ProjectController::class)->except(['show']);
     Route::resource('series', SeriesController::class)->except(['show']);
 
-    Route::resource('users', UserController::class)->except(['show'])->middleware('admin');
+    Route::resource('users', UserController::class)->except(['show']);
+    
 });

@@ -9,10 +9,13 @@ use App\Models\Project;
 use App\Models\TransmittalDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transmittal extends Model
 {
-    use HasFactory; use Uuids;
+    use HasFactory; 
+    use SoftDeletes; 
+    use Uuids;
 
     protected $guarded = [];
 
@@ -34,5 +37,10 @@ class Transmittal extends Model
     public function transmittal_details()
     {
         return $this->hasMany(TransmittalDetail::class);
+    }
+
+    public function deliveries()
+    {
+        return $this->hasMany(Delivery::class);
     }
 }

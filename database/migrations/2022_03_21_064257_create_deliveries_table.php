@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransmittalDetailsTable extends Migration
+class CreateDeliveriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateTransmittalDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transmittal_details', function (Blueprint $table) {
+        Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('transmittal_id')->references('id')->on('transmittals');
-            $table->string('qty');
-            $table->string('title');
-            $table->string('remarks');
+            $table->dateTime('delivery_date', 0);
+            $table->foreignId('user_id')->references('id')->on('users');
+            $table->string('delivery_status');
+            $table->string('delivery_remarks')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -31,6 +31,6 @@ class CreateTransmittalDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transmittal_details');
+        Schema::dropIfExists('deliveries');
     }
 }

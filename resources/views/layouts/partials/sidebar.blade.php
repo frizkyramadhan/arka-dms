@@ -17,8 +17,8 @@
           <span>Transmittal Forms</span>
         </a>
       </li>
-      <li>
-        <a class="nav-link" href="blank.html"><i class="fas fa-search-location"></i>
+      <li class="{{ Request::is('trackings*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('trackings') }}"><i class="fas fa-search-location"></i>
           <span>Tracking</span>
         </a>
       </li>

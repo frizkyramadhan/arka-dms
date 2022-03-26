@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+use App\Models\Transmittal;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,9 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
         $this->call(ProjectSeeder::class);
         $this->call(AdminUserSeeder::class);
         $this->call(SeriesSeeder::class);
+
+        User::factory(10)->create();
+        Transmittal::factory(100)->create();
     }
 }
