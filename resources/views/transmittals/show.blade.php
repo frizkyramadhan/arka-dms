@@ -9,6 +9,8 @@
           <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i
               class="fas fa-arrow-alt-circle-left"></i>
             Back</a>
+          <a href="{{ url('trackings?search=' . $transmittal->receipt_full_no) }}" title="Track"
+            class="btn btn-icon icon-left btn-light"><i class="fas fa-search-location"></i> Track</a>
           <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit"
             class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
         @else
@@ -190,22 +192,22 @@
             @csrf
             <div class="form-group">
               <label>Status</label>
-              <select name="delivery_status" id="delivery_status" class="form-control">
+              <select name="delivery_status" id="delivery_status" class="form-control" onchange="addTemplate(this);">
                 <option value="send">Send</option>
                 <option value="receive">Receive</option>
               </select>
             </div>
             <div class="form-group">
-              <label id="delivery_date">Date</label>
+              <label>Date</label>
               <input type="datetime-local" name="delivery_date" class="form-control" required>
             </div>
             <div class="form-group">
-              <label id="delivery_by">By</label>
+              <label>By</label>
               <input type="text" class="form-control" value="{{ auth()->user()->full_name }}" readonly>
             </div>
             <div class="form-group">
               <label>Remarks</label>
-              <textarea name="delivery_remarks" cols="30" rows="5" class="form-control" required></textarea>
+              <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="5" required></textarea>
             </div>
           </div>
           <div class="modal-footer bg-whitesmoke br">
@@ -234,24 +236,25 @@
               @csrf
               <div class="form-group">
                 <label>Status</label>
-                <select name="delivery_status" id="delivery_status" class="form-control">
+                <select name="delivery_status" id="delivery_status_{{ $delivery->id }}" class="form-control"
+                  onchange="editTemplate({{ $delivery->id }});">
                   <option value="send" {{ $delivery->delivery_status == 'send' ? 'selected' : null }}>Send</option>
                   <option value="receive" {{ $delivery->delivery_status == 'receive' ? 'selected' : null }}>Receive
                   </option>
                 </select>
               </div>
               <div class="form-group">
-                <label id="delivery_date">Date</label>
+                <label>Date</label>
                 <input type="datetime-local" name="delivery_date" class="form-control"
                   value="{{ date('Y-m-d\TH:i', strtotime($delivery->delivery_date)) }}" required>
               </div>
               <div class="form-group">
-                <label id="delivery_by">By</label>
+                <label>By</label>
                 <input type="text" class="form-control" value="{{ $delivery->user->full_name }}" readonly>
               </div>
               <div class="form-group">
                 <label>Remarks</label>
-                <textarea name="delivery_remarks" cols="30" rows="5" class="form-control"
+                <textarea name="delivery_remarks" id="delivery_remarks_{{ $delivery->id }}" cols="30" rows="5" class="form-control"
                   required>{{ $delivery->delivery_remarks }}</textarea>
               </div>
             </div>
@@ -265,41 +268,30 @@
     </div>
   @endforeach
 
-
-  <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
   <script type="text/javascript">
-    // transmittal details dynamic table
-    $("#dynamic-ar").on('click', function() {
-      addTransmittalDetail();
-    });
+    var sendTemplate = 'Sent to : ' + '\n' +
+      'Sent by :' + '\n' +
+      'Contact :' + '\n' +
+      'Other information :';
+    var receiveTemplate = 'Received from : ' + '\n' +
+      'Received by :' + '\n' +
+      'Contact :' + '\n' +
+      'Other information:';
 
-    function addTransmittalDetail() {
-      var tr =
-        '<tr><td><input type="text" name="qty[]" class="form-control" autocomplete="off" required/></td><td><input type="text" name="title[]" class="form-control" autocomplete="off" required/></td><td><input type="text" name="remarks[]" class="form-control" autocomplete="off" required/></td><td><button type="button" class="btn btn-outline-danger remove-input-field"><i class="fas fa-trash-alt"></i></button></td></tr>';
-      $("#dynamicAddRemove").append(tr);
-    };
-    $(document).on('click', '.remove-input-field', function() {
-      $(this).parents('tr').remove();
-    });
-
-    // check project_id when page loaded
-    $(document).ready(function() {
-      var project_id = $('#project_id').val();
-      if (project_id == '') {
-        $('#to').prop('readonly', false);
+    function addTemplate(el) {
+      if (el.value == 'send') {
+        document.getElementById('delivery_remarks').value = sendTemplate;
       } else {
-        $('#to').prop('readonly', true);
+        document.getElementById('delivery_remarks').value = receiveTemplate;
       }
+    }
 
-      // if project_id is null, read only to field
-      $('#project_id').on('change', function() {
-        if ($(this).val() == '') {
-          $('#to').prop('readonly', false);
-        } else {
-          $('#to').prop('readonly', true);
-          $('#to').val('');
-        }
-      });
-    });
+    function editTemplate(el) {
+      if (document.getElementById('delivery_status_' + el).value == 'send') {
+        document.getElementById('delivery_remarks_' + el).value = sendTemplate;
+      } else if (document.getElementById('delivery_status_' + el).value == 'receive') {
+        document.getElementById('delivery_remarks_' + el).value = receiveTemplate;
+      }
+    }
   </script>
 @endsection

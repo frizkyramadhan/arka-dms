@@ -22,7 +22,7 @@ class TrackingController extends Controller
         
         $trackings = DB::table('deliveries')
             ->leftJoin('transmittals', 'transmittals.id', '=', 'deliveries.transmittal_id')
-            ->leftJoin('users', 'users.id', '=', 'transmittals.user_id')
+            ->leftJoin('users', 'users.id', '=', 'deliveries.user_id')
             ->select('deliveries.*', 'transmittals.receipt_full_no', 'users.full_name')
             ->when($request->search, function($query) use ($request){
             return $query->where('transmittals.receipt_full_no', 'like', '%'.$request->search.'%');

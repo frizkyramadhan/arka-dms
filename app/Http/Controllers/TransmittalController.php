@@ -53,8 +53,8 @@ class TransmittalController extends Controller
                     if ($transmittals->status == 'published'){
                         return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
                     } elseif ($transmittals->status == 'sent'){
-                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
-                    } elseif ($transmittals->status == 'closed'){
+                        return '<span class="badge badge-primary">'. $transmittals->status .'</span>';
+                    } elseif ($transmittals->status == 'delivered'){
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';
                     }
                 })
@@ -275,7 +275,7 @@ class TransmittalController extends Controller
         $details = TransmittalDetail::where('transmittal_id', $id)->get();
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
         $transmittal = Transmittal::with(['project','user'])->withTrashed()->where('id', $id)->first();
-        // dd($transmittal);
+        
         return view('transmittals.print', compact('title', 'subtitle', 'transmittal','details','deliveries','company'));
     }
 

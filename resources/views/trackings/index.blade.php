@@ -61,7 +61,7 @@
                             {{ date('d-M-Y - H:m', strtotime($tracking->delivery_date)) }}</span>
                           <span class="bullet"></span>
                         </div>
-                        <p>{{ $tracking->delivery_remarks }}</p>
+                        <p style="white-space: pre">{{ $tracking->delivery_remarks }}</p>
                       </div>
                     </div>
                   @endforeach

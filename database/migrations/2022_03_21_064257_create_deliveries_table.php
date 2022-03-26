@@ -21,7 +21,6 @@ class CreateDeliveriesTable extends Migration
             $table->string('delivery_status');
             $table->string('delivery_remarks')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
