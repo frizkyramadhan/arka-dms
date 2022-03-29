@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Project;
+use App\Models\Department;
 use App\Models\Transmittal;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'project_id',
+        'department_id',
         'level'
     ];
 
@@ -49,6 +51,11 @@ class User extends Authenticatable
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function transmittal()

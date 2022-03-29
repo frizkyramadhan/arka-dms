@@ -9,6 +9,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\TransmittalController;
 
 /*
@@ -43,6 +44,7 @@ Route::middleware('auth')->group(function(){
     Route::post('transmittals/{id?}/delivery', [TransmittalController::class, 'add_delivery']);
     Route::put('transmittals/{transmittal_id?}/delivery/{id?}', [TransmittalController::class, 'edit_delivery']);
     Route::get('transmittals/{transmittal_id?}/delivery/delete/{id?}', [TransmittalController::class, 'delete_delivery']);
+    Route::get('transmittals/getReceiver', [TransmittalController::class, 'getReceiver'])->name('transmittals.getReceiver');
     Route::resource('transmittals', TransmittalController::class);
 
     // route tracking transmittal
@@ -59,6 +61,7 @@ Route::middleware('admin')->group(function(){
     Route::delete('companies/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
         
     Route::resource('projects', ProjectController::class)->except(['show']);
+    Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('series', SeriesController::class)->except(['show']);
 
     Route::resource('users', UserController::class)->except(['show']);

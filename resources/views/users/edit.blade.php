@@ -73,6 +73,22 @@
                   </div>
                 </div>
                 <div class="form-group row mb-4">
+                  <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Department</label>
+                  <div class="col-sm-12 col-md-7">
+                    <select class="form-control @error('department_id') is-invalid @enderror" name="department_id">
+                      <option value="">- Select Department -</option>
+                      @foreach ($departments as $item)
+                        <option value="{{ $item->id }}"
+                          {{ old('department_id', $user->department_id) == $item->id ? 'selected' : null }}>
+                          {{ $item->dept_name }}</option>
+                      @endforeach
+                    </select>
+                    @error('department_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
+                </div>
+                <div class="form-group row mb-4">
                   <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Role</label>
                   <div class="col-sm-12 col-md-7">
                     <select class="form-control" name="level">

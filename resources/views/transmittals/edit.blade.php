@@ -76,10 +76,35 @@
                     </div>
                   @enderror
                 </div>
+                <div class="form-group d-none" id="department-form">
+                  <label>Department</label>
+                  <select class="form-control mb-1" name="department_id" id="department_id">
+                    <option value="">- Select Department -</option>
+                    @foreach ($departments as $dept)
+                      <option value="{{ $dept->id }}"
+                        {{ old('department_id', $transmittal->department_id) == $dept->id ? 'selected' : null }}>
+                        {{ $dept->dept_name }}</option>
+                    @endforeach
+                  </select>
+                  @error('department_id')
+                    <div class="invalid-feedback">
+                      {{ $message }}
+                    </div>
+                  @enderror
+                </div>
                 <div class="form-group">
                   <label>Attn</label>
-                  <input type="text" class="form-control" name="attn" autocomplete="off"
+                  {{-- @dd($receivers) --}}
+                  <input id="attn" type="text" class="form-control" name="attn" autocomplete="off"
                     value="{{ old('attn', $transmittal->attn) }}">
+                  <select class="form-control d-none mb-1" name="received_by" id="received_by">
+                    <option value="">- Select Receiver -</option>
+                    @foreach ($receivers as $receiver)
+                      <option value="{{ $receiver->id }}"
+                        {{ old('received_by', $transmittal->received_by) == $receiver->id ? 'selected' : null }}>
+                        {{ $receiver->full_name }}</option>
+                    @endforeach
+                  </select>
                 </div>
               </div>
             </div>
@@ -147,21 +172,52 @@
     // check project_id when page loaded
     $(document).ready(function() {
       var project_id = $('#project_id').val();
-      if (project_id == '') {
-        $('#to').prop('readonly', false);
-      } else {
-        $('#to').prop('readonly', true);
+      var department_id = $('#department_id').val();
+      console.log(project_id);
+      console.log(department_id);
+      if ($('#project_id').val() == '') { // to external
+        $('#to').prop('readonly', false).removeClass('d-none');
+      } else { // to internal
+        $('#to').prop('readonly', true).hide();
+        $('#attn').prop('readonly', true).hide();
+        $('#department-form').removeClass('d-none');
+        $('#received_by').removeClass('d-none');
       }
 
       // if project_id is null, read only to field
-      $('#project_id').on('change', function() {
-        if ($(this).val() == '') {
-          $('#to').prop('readonly', false);
-        } else {
-          $('#to').prop('readonly', true);
-          $('#to').val('');
+      $('#project_id, #department_id').on('change', function() {
+        if ($('#project_id').val() == '') { // change to external
+          $('#department-form, #received_by').addClass('d-none'); // make it invisible
+          $('#department_id').val('');
+          $('#received_by').val('');
+          $('#to').prop('readonly', false).show();
+          $('#attn').prop('readonly', false).val('').show();
+        } else { // change to internal project
+          $('#department-form, #received_by').removeClass('d-none');
+          $('#to').prop('readonly', true).hide().val('');
+          $('#attn').hide().val('');
+          getReceiver();
         }
       });
+
+      function getReceiver() {
+        var project_id = $('#project_id').val();
+        var department_id = $('#department_id').val();
+        var $receiver = $('#received_by');
+        $.ajax({
+          url: "{{ route('transmittals.getReceiver') }}",
+          data: {
+            project_id: project_id,
+            department_id: department_id
+          },
+          success: function(data) {
+            $receiver.html('<option value="" selected>- Select Receiver -</option>');
+            $.each(data, function(id, value) {
+              $receiver.append('<option value="' + id + '">' + value + '</option>');
+            });
+          }
+        });
+      };
     });
   </script>
 @endsection

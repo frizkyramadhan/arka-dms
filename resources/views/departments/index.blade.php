@@ -5,7 +5,7 @@
     <div class="section-header">
       <h1>{{ $title }}</h1>
       <div class="section-header-button">
-        <a href="{{ url('users/create') }}" class="btn btn-primary">Add New</a>
+        <a href="{{ url('departments/create') }}" class="btn btn-primary">Add New</a>
       </div>
     </div>
     <div class="section-body">
@@ -17,8 +17,13 @@
             </div>
             <div class="card-body">
               @if (session('status'))
-                <div class="alert alert-success">
-                  {{ session('status') }}
+                <div class="alert alert-success alert-dismissible show fade">
+                  <div class="alert-body">
+                    <button class="close" data-dismiss="alert">
+                      <span>&times;</span>
+                    </button>
+                    {{ session('status') }}
+                  </div>
                 </div>
               @endif
               <div class="table-responsive">
@@ -26,27 +31,27 @@
                   <thead>
                     <tr>
                       <th class="text-center">#</th>
-                      <th>Full Name</th>
-                      <th>Email</th>
-                      <th>Project</th>
-                      <th>Department</th>
-                      <th>Role</th>
+                      <th>Department Name</th>
+                      <th>Status</th>
                       <th class="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach ($users as $user)
+                    @foreach ($departments as $department)
                       <tr>
                         <td class="text-center">{{ $loop->iteration }}</td>
-                        <td>{{ $user->full_name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->project->project_code }}</td>
-                        <td>{{ $user->department->dept_name }}</td>
-                        <td>{{ $user->level }}</td>
+                        <td>{{ $department->dept_name }}</td>
+                        <td>
+                          @if ($department->dept_status == 'active')
+                            <span class="badge badge-success">Active</span>
+                          @elseif ($department->dept_status == 'inactive')
+                            <span class="badge badge-danger">Inactive</span>
+                          @endif
+                        </td>
                         <td class="text-center">
-                          <a href="{{ url('users/' . $user->id . '/edit') }}" class="btn btn-icon btn-primary"><i
-                              class="far fa-edit"></i></a>
-                          <form action="{{ url('users/' . $user->id) }}" method="post"
+                          <a href="{{ url('departments/' . $department->id . '/edit') }}"
+                            class="btn btn-icon btn-primary"><i class="far fa-edit"></i></a>
+                          <form action="{{ url('departments/' . $department->id) }}" method="post"
                             onsubmit="return confirm('Are you sure want to delete this data?')" class="d-inline">
                             @method('delete')
                             @csrf

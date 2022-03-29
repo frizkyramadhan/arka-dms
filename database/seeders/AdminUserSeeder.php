@@ -19,7 +19,8 @@ class AdminUserSeeder extends Seeder
             'email' => 'administrator@arka-doc.dev',
             'password' => bcrypt('admin'),
             'level' => 'administrator',
-            'project_id' => 1
+            'project_id' => 1,
+            'department_id' => 8
         ]);
     }
 }

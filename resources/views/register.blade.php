@@ -52,12 +52,7 @@
                   <div class="form-group">
                     <label for="password" class="d-block">Password</label>
                     <input id="password" type="password"
-                      class="form-control pwstrength @error('password') is-invalid @enderror"
-                      data-indicator="pwindicator" name="password">
-                    <div id="pwindicator" class="pwindicator">
-                      <div class="bar"></div>
-                      <div class="label"></div>
-                    </div>
+                      class="form-control pwstrength @error('password') is-invalid @enderror" name="password">
                     @error('password')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -73,6 +68,20 @@
                       @endforeach
                     </select>
                     @error('project_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
+                  <div class="form-group">
+                    <label>Department</label>
+                    <select class="form-control @error('department_id') is-invalid @enderror" name="department_id">
+                      <option value="">- Select Deparment -</option>
+                      @foreach ($departments as $item)
+                        <option value="{{ $item->id }}"
+                          {{ old('department_id') == $item->id ? 'selected' : null }}>
+                          {{ $item->dept_name }}</option>
+                      @endforeach
+                    </select>
+                    @error('department_id')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
@@ -107,8 +116,7 @@
   <script src="{{ asset('assets/js/stisla.js') }}"></script>
 
   <!-- JS Libraies -->
-  <script src="{{ asset('assets/modules/jquery-pwstrength/jquery.pwstrength.min.js') }}"></script>
-  <script src="{{ asset('assets/modules/jquery-selectric/jquery.selectric.min.js') }}"></script>
+  {{-- <script src="{{ asset('assets/modules/jquery-selectric/jquery.selectric.min.js') }}"></script> --}}
 
   <!-- Page Specific JS File -->
   <script src="{{ asset('assets/js/page/auth-register.js') }}"></script>
