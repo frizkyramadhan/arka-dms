@@ -39,6 +39,11 @@
             <span>Users</span>
           </a>
         </li>
+        <li class="{{ Request::is('departments*') ? 'active' : '' }}">
+          <a class="nav-link" href="{{ url('departments') }}"><i class="fas fa-layer-group"></i>
+            <span>Department</span>
+          </a>
+        </li>
         <li class="{{ Request::is('projects*') ? 'active' : '' }}">
           <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
             <span>Project</span>

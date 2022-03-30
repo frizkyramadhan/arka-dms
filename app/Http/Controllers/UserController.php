@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Project;
+use App\Models\Department;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +38,8 @@ class UserController extends Controller
         $title = 'Users';
         $subtitle = 'Add Users Data';
         $projects = Project::orderBy('project_code', 'asc')->get();
-        return view('users.create', compact('title', 'subtitle', 'projects'));
+        $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
+        return view('users.create', compact('title', 'subtitle', 'projects','departments'));
     }
 
     /**
@@ -53,12 +55,14 @@ class UserController extends Controller
             'email' => 'required|email:dns|unique:users|ends_with:@arka.co.id',
             'password' => 'required|min:5',
             'project_id' => 'required',
+            'department_id' => 'required',
             'level' => 'required'
         ],[
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
             'password.required' => 'Password is required',
             'project_id.required' => 'Project is required',
+            'department_id.required' => 'Department is required',
         ]);
 
         $validatedData['password'] = Hash::make($validatedData['password']);
@@ -91,8 +95,9 @@ class UserController extends Controller
         $title = 'Users';
         $subtitle = 'Edit Users Data';
         $projects = Project::orderBy('project_code', 'asc')->get();
+        $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
         $user = User::findOrFail($id);
-        return view('users.edit', compact('title', 'subtitle', 'projects', 'user'));
+        return view('users.edit', compact('title', 'subtitle', 'projects', 'departments', 'user'));
     }
 
     /**
@@ -106,11 +111,13 @@ class UserController extends Controller
     {
         $this->validate($request, [
             'full_name' => 'required',
-            'project_id' => 'required'
+            'project_id' => 'required',
+            'department_id' => 'required'
         ],[
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
-            'project_id.required' => 'Project is required'
+            'project_id.required' => 'Project is required',
+            'department_id.required' => 'Department is required'
         ]);
         
         $input = $request->all();

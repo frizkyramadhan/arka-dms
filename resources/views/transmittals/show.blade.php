@@ -76,7 +76,11 @@
                         </address>
                         <address style="font-size: 12pt">
                           <strong>Attn:</strong><br>
-                          {{ $transmittal->attn }}
+                          @if (empty($transmittal->attn))
+                            {{ $transmittal->receiver->full_name }}
+                          @else
+                            {{ $transmittal->attn }}
+                          @endif
                         </address>
                       </div>
                     </div>
@@ -112,7 +116,11 @@
                       <div class="col-md-6 text-md-right">
                         <address style="font-size: 12pt">
                           <strong>Received by:</strong><br>
-                          {{ $transmittal->received_by }}
+                          @if (empty($transmittal->attn))
+                            {{ $transmittal->receiver->full_name }}
+                          @else
+                            {{ $transmittal->attn }}
+                          @endif
                         </address>
                         <address style="font-size: 12pt">
                           <strong>Received Date:</strong><br>
