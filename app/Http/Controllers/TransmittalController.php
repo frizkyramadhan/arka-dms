@@ -60,7 +60,7 @@ class TransmittalController extends Controller
                     if ($transmittals->status == 'published'){
                         return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
                     } elseif ($transmittals->status == 'sent'){
-                        return '<span class="badge badge-primary">'. $transmittals->status .'</span>';
+                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
                     } elseif ($transmittals->status == 'delivered'){
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';
                     }
@@ -79,7 +79,7 @@ class TransmittalController extends Controller
                     }
                 })
                 ->addColumn('action', 'transmittals.action')
-                ->rawColumns(['status','action','action1'])
+                ->rawColumns(['status','action'])
                 ->toJson();
         }
     }
@@ -341,6 +341,13 @@ class TransmittalController extends Controller
 
     public function add_delivery(Request $request, $transmittal_id)
     {
+        // check if transmittal_id is exist in delivery table
+        if(Delivery::where('transmittal_id', $transmittal_id)->doesntExist()){
+            // change transmittal status to delivered
+            Transmittal::where('id', $transmittal_id)->update(['status' => 'sent']);
+        }
+        
+        
         // add delivery process
         $data = $request->all();
         $delivery = new Delivery();
@@ -379,7 +386,8 @@ class TransmittalController extends Controller
 
     public function data()
     {
-        $transmittals = Transmittal::join('projects', 'transmittals.project_id', '=', 'projects.id')
+        $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
+                ->leftJoin('users', 'transmittals.received_by', '=', 'users.id')
                 ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_no', 'desc');
             return DataTables::of($transmittals)
                 ->addIndexColumn()
@@ -397,14 +405,18 @@ class TransmittalController extends Controller
                     }
                 })
                 ->addColumn('attn', function($transmittals){
-                    return $transmittals->attn;
+                    if($transmittals->attn == null){
+                        return $transmittals->receiver->full_name;
+                    } else {
+                        return $transmittals->attn;
+                    }
                 })
                 ->addColumn('status', function($transmittals){
                     if ($transmittals->status == 'published'){
                         return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
                     } elseif ($transmittals->status == 'sent'){
                         return '<span class="badge badge-info">'. $transmittals->status .'</span>';
-                    } elseif ($transmittals->status == 'closed'){
+                    } elseif ($transmittals->status == 'delivered'){
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';
                     }
                 })

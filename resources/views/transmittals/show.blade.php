@@ -187,7 +187,7 @@
   </section>
   {{-- add delivery modal --}}
   <div class="modal fade" tabindex="-1" role="dialog" id="exampleModal">
-    <form action="{{ url('transmittals/' . $transmittal->id . '/delivery') }}" method="POST">
+    <form action="{{ url('transmittals/delivery/' . $transmittal->id) }}" method="POST">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -278,13 +278,14 @@
 
   <script type="text/javascript">
     var sendTemplate = 'Sent to : ' + '\n' +
-      'Sent by :' + '\n' +
-      'Contact :' + '\n' +
-      'Other information :';
+      'Sent by : ' + '\n' +
+      'Contact : ' + '\n' +
+      'Other information : ';
     var receiveTemplate = 'Received from : ' + '\n' +
-      'Received by :' + '\n' +
-      'Contact :' + '\n' +
-      'Other information:';
+      'Received by : ' + '\n' +
+      'Contact : ' + '\n' +
+      'Other information : ';
+    document.getElementById('delivery_remarks').value = sendTemplate;
 
     function addTemplate(el) {
       if (el.value == 'send') {
