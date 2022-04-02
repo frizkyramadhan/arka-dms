@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\DB;
 
 class TransmittalController extends Controller
 {
+    // public function __construct()
+    // {
+    //     $this->authorizeResource(Transmittal::class);
+    // }
+
     /**
      * Display a listing of the resource.
      *
@@ -30,10 +35,23 @@ class TransmittalController extends Controller
     
     public function getTransmittals(Request $request)
     {
+        $user = auth()->user();
         if($request->ajax()){
-            $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
-                ->leftJoin('users', 'transmittals.received_by', '=', 'users.id')
-                ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_no', 'desc');
+            if($user->level == 'administrator'){
+                $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
+                    ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
+                    ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
+                    ->select(['transmittals.*', 'projects.project_code','receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
+                    ->orderBy('transmittals.receipt_no', 'desc');
+            } else {
+                $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
+                    ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
+                    ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
+                    ->select(['transmittals.*', 'projects.project_code','receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
+                    ->where('creators.department_id', $user->department_id)
+                    // ->where('creators.project_id', $user->project_id) // comment to make this transmittal all project
+                    ->orderBy('transmittals.receipt_no', 'desc');
+            }
             return DataTables::of($transmittals)
                 ->addIndexColumn()
                 ->addColumn('receipt_full_no', function($transmittals){
@@ -41,6 +59,9 @@ class TransmittalController extends Controller
                 })
                 ->addColumn('receipt_date', function($transmittals){
                     return date('d-M-Y', strtotime($transmittals->receipt_date));
+                })
+                ->addColumn('created_by', function($transmittals){
+                    return $transmittals->user->full_name;
                 })
                 ->addColumn('to', function($transmittals){
                     if($transmittals->project_id == null){
@@ -74,6 +95,8 @@ class TransmittalController extends Controller
                             ->orWhere('project_code', 'LIKE', "%$search%")
                             ->orWhere('to', 'LIKE', "%$search%")
                             ->orWhere('attn', 'LIKE', "%$search%")
+                            ->orWhere('creators.full_name', 'LIKE', "%$search%")
+                            ->orWhere('receivers.full_name', 'LIKE', "%$search%")
                             ->orWhere('status', 'LIKE', "%$search%");
                         });
                     }
@@ -197,6 +220,8 @@ class TransmittalController extends Controller
     {
         // edit transmittal
         // dd($transmittal->project_id);
+        $this->authorize('update', $transmittal);
+
         $title = 'Transmittal Form';
         $subtitle = 'Edit Transmittal Form';
         $projects = Project::orderBy('project_code', 'asc')->get();
@@ -275,6 +300,8 @@ class TransmittalController extends Controller
     public function destroy(Transmittal $transmittal)
     {
         // destroy transmittal form and its details
+        $this->authorize('delete', $transmittal);
+
         TransmittalDetail::where('transmittal_id', $transmittal->id)->delete(); 
         Transmittal::where('id', $transmittal->id)->delete();
         return redirect('transmittals')->with('status', 'Transmittal Form has been deleted!');

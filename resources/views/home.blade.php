@@ -16,7 +16,7 @@
                 </div>
               @endif
               <div>
-
+                {{ auth()->user() }}
               </div>
             </div>
           </div>

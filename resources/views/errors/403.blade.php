@@ -29,7 +29,7 @@
             </div>
             <div class="page-search">
               <div class="mt-3">
-                <a href="{{ url('/') }}">Back to Home</a>
+                <a href="{{ url()->previous() }}">Go Back!</a>
               </div>
             </div>
           </div>

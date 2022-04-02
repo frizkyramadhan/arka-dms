@@ -18,7 +18,7 @@ class TransmittalPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return $user->level == 'administrator' || $user->level == 'superuser' || $user->level == 'user';
     }
 
     /**
@@ -53,7 +53,7 @@ class TransmittalPolicy
      */
     public function update(User $user, Transmittal $transmittal)
     {
-        //
+        return $user->id === $transmittal->user_id;
     }
 
     /**
@@ -65,7 +65,7 @@ class TransmittalPolicy
      */
     public function delete(User $user, Transmittal $transmittal)
     {
-        //
+        return $user->id === $transmittal->user_id;
     }
 
     /**
