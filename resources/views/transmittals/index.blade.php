@@ -33,6 +33,7 @@
                       <th class="text-center" width="8%">#</th>
                       <th>Receipt No</th>
                       <th>Date</th>
+                      <th>Created by</th>
                       <th>To</th>
                       <th>Attn</th>
                       <th class="text-center">Status</th>
@@ -114,6 +115,10 @@
           {
             data: 'receipt_date',
             name: 'receipt_date'
+          },
+          {
+            data: 'created_by',
+            name: 'created_by'
           },
           {
             data: 'to',
