@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Delivery;
 use App\Models\Transmittal;
+use App\Policies\DeliveryPolicy;
 use App\Policies\TransmittalPolicy;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Transmittal::class => TransmittalPolicy::class,
+        Delivery::class => DeliveryPolicy::class,
     ];
 
     /**

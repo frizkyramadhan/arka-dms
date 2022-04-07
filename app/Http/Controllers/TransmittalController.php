@@ -80,10 +80,10 @@ class TransmittalController extends Controller
                 ->addColumn('status', function($transmittals){
                     if ($transmittals->status == 'published'){
                         return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
-                    } elseif ($transmittals->status == 'sent'){
-                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
-                    } elseif ($transmittals->status == 'delivered'){
+                    } elseif ($transmittals->status == 'on delivery'){
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';
+                    } elseif ($transmittals->status == 'delivered'){
+                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
                     }
                 })
                 ->filter(function ($instance) use ($request) {
@@ -368,12 +368,17 @@ class TransmittalController extends Controller
 
     public function add_delivery(Request $request, $transmittal_id)
     {
+        // dd($request->receive_button);
         // check if transmittal_id is exist in delivery table
         if(Delivery::where('transmittal_id', $transmittal_id)->doesntExist()){
             // change transmittal status to delivered
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'sent']);
+            Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
         }
-        
+
+        if($request->receive_button == 'receive'){
+            // change transmittal status to received
+            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
+        }
         
         // add delivery process
         $data = $request->all();
@@ -390,6 +395,13 @@ class TransmittalController extends Controller
     
     public function edit_delivery(Request $request, $transmittal_id, $id)
     {
+        $this->authorize('update_delivery', [Delivery::class, $id]);
+
+        if($request->receive_button == 'receive'){
+            // change transmittal status to received
+            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
+        }
+        
         // edit delivery process
         Delivery::where('id', $id)->update([
             'transmittal_id' => $transmittal_id,
@@ -405,6 +417,7 @@ class TransmittalController extends Controller
 
     public function delete_delivery($transmittal_id, $id)
     {
+        $this->authorize('delete_delivery', [Delivery::class, $id]);
         // delete delivery detail
         Delivery::where('id', $id)->delete();
 
@@ -441,7 +454,7 @@ class TransmittalController extends Controller
                 ->addColumn('status', function($transmittals){
                     if ($transmittals->status == 'published'){
                         return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
-                    } elseif ($transmittals->status == 'sent'){
+                    } elseif ($transmittals->status == 'on delivery'){
                         return '<span class="badge badge-info">'. $transmittals->status .'</span>';
                     } elseif ($transmittals->status == 'delivered'){
                         return '<span class="badge badge-success">'. $transmittals->status .'</span>';

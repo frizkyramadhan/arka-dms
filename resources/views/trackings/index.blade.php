@@ -46,17 +46,20 @@
                     <div class="activity">
                       @if ($tracking->delivery_status == 'send')
                         <div class="activity-icon bg-info text-white shadow-info">
-                          <i class="fas fa-paper-plane"></i>
+                          <i class="fas fa-plane-departure"></i>
                         </div>
                       @elseif ($tracking->delivery_status == 'receive')
                         <div class="activity-icon bg-success text-white shadow-success">
-                          <i class="fas fa-check"></i>
+                          <i class="fas fa-plane-arrival"></i>
                         </div>
                       @endif
                       <div class="activity-detail">
                         <div class="mb-2">
                           <span class="bullet"></span>
-                          <span class="text-job">{{ $tracking->delivery_status }} by
+                          <span class="text-job">
+                            <a href="{{ url('transmittals/' . $tracking->transmittal_id) }}"
+                              title="Detail">{{ $tracking->receipt_full_no }}</a>
+                            {{ $tracking->delivery_status }} by
                             {{ $tracking->full_name }} at
                             {{ date('d-M-Y - H:m', strtotime($tracking->delivery_date)) }}</span>
                           <span class="bullet"></span>
