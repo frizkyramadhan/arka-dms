@@ -65,7 +65,9 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-12 col-md-5 col-lg-5">
+
+        {{-- quick tracking --}}
         <div class="card card-hero">
           <div class="card-header">
             <div class="card-icon">
@@ -91,8 +93,30 @@
             </div>
           </div>
         </div>
+
+        {{-- project chart --}}
+        <div class="card">
+          <div class="card-header">
+            <h4>Projects</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="project-chart"></canvas>
+          </div>
+        </div>
+
+        {{-- department chart --}}
+        <div class="card">
+          <div class="card-header">
+            <h4>Departments</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="dept-chart"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="col-md-8">
+      <div class="col-12 col-md-7 col-lg-7">
+
+        {{-- transmittal form on delivery --}}
         <div class="card">
           <div class="card-header">
             <h4>{{ $tf_subtitle }}</h4>
@@ -102,7 +126,7 @@
               <table class="table table-striped table-hover table-condensed" id="table-1">
                 <thead>
                   <tr>
-                    <th>Receipt No</th>
+                    <th>Receipt</th>
                     <th>Date</th>
                     <th>Created by</th>
                     <th>To</th>
@@ -149,4 +173,107 @@
       </div>
     </div>
   </section>
+
+  <script src="{{ asset('assets/modules/chart.min.js') }}"></script>
+  <script>
+    const p_labels = [
+      @foreach ($projects as $p)
+        '{{ $p->project_code }}',
+      @endforeach
+    ];
+    const d_labels = [
+      @foreach ($departments as $d)
+        '{{ $d->dept_name }}',
+      @endforeach
+    ];
+    const backgroundcolor = [];
+    const bordercolor = [];
+
+    for (i = 0; i < p_labels.length; i++) {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      backgroundcolor.push('rgba(' + r + ', ' + g + ', ' + b + ', 0.5)');
+      bordercolor.push('rgba(' + r + ', ' + g + ', ' + b + ', 1)');
+    }
+
+    for (i = 0; i < d_labels.length; i++) {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      backgroundcolor.push('rgba(' + r + ', ' + g + ', ' + b + ', 0.5)');
+      bordercolor.push('rgba(' + r + ', ' + g + ', ' + b + ', 1)');
+    }
+
+    var ctx = document.getElementById("dept-chart").getContext('2d');
+    var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: d_labels,
+        datasets: [{
+          label: 'Statistics',
+          data: [
+            @foreach ($departments as $d)
+              '{{ $d->countdept }}',
+            @endforeach
+          ],
+          borderWidth: 2,
+          backgroundColor: backgroundcolor,
+          borderColor: bordercolor,
+          borderWidth: 2.5,
+          pointBackgroundColor: '#ffffff',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        legend: {
+          display: false
+        },
+        scales: {
+          yAxes: [{
+            gridLines: {
+              drawBorder: false,
+              color: '#f2f2f2',
+            },
+            ticks: {
+              beginAtZero: true,
+              stepSize: 10
+            }
+          }],
+          xAxes: [{
+            ticks: {
+              display: false
+            },
+            gridLines: {
+              display: false
+            }
+          }]
+        },
+      }
+    });
+
+    var ctx = document.getElementById("project-chart").getContext('2d');
+    var myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: [
+            @foreach ($projects as $p)
+              '{{ $p->countpro }}',
+            @endforeach
+          ],
+          backgroundColor: backgroundcolor,
+          label: 'Dataset 1'
+        }],
+        labels: p_labels,
+      },
+      options: {
+        responsive: true,
+        legend: {
+          position: 'bottom',
+        },
+      }
+    });
+  </script>
 @endsection

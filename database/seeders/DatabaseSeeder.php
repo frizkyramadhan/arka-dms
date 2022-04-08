@@ -21,6 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SeriesSeeder::class);
 
         User::factory(10)->create();
-        Transmittal::factory(1000)->create();
+        // Transmittal::factory(1000)->create();
     }
 }

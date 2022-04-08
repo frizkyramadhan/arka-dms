@@ -27,10 +27,6 @@ class DepartmentSeeder extends Seeder
             'dept_status' => 'active'
         ]);
         Department::create([
-            'dept_name' => 'Engineering',
-            'dept_status' => 'active'
-        ]);
-        Department::create([
             'dept_name' => 'Finance',
             'dept_status' => 'active'
         ]);
@@ -48,6 +44,10 @@ class DepartmentSeeder extends Seeder
         ]);
         Department::create([
             'dept_name' => 'Logistic',
+            'dept_status' => 'active'
+        ]);
+        Department::create([
+            'dept_name' => 'Operation',
             'dept_status' => 'active'
         ]);
         Department::create([
