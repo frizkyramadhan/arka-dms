@@ -20,7 +20,7 @@ class AdminUserSeeder extends Seeder
             'password' => bcrypt('admin'),
             'level' => 'administrator',
             'project_id' => 1,
-            'department_id' => 8
+            'department_id' => 7
         ]);
     }
 }

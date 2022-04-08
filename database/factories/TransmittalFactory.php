@@ -21,8 +21,9 @@ class TransmittalFactory extends Factory
             'project_id' => $this->faker->numberBetween(1, 7),
             'department_id' => $this->faker->numberBetween(1, 13),
             'to' => $this->faker->city(),
-            'attn' => $this->faker->name(),
-            'status' => $this->faker->randomElement(['published', 'sent', 'delivered']),
+            // 'attn' => $this->faker->name(),
+            'received_by' => $this->faker->numberBetween(1, 10),
+            'status' => $this->faker->randomElement(['published', 'on delivery', 'delivered']),
         ];
     }
 }

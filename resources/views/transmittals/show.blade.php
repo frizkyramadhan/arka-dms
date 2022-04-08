@@ -29,10 +29,10 @@
                 Status:
                 @if ($transmittal->status == 'published')
                   <span class="badge badge-warning">{{ $transmittal->status }}</span>
-                @elseif ($transmittal->status == 'sent')
-                  <span class="badge badge-info">{{ $transmittal->status }}</span>
-                @elseif ($transmittal->status == 'closed')
+                @elseif ($transmittal->status == 'on delivery')
                   <span class="badge badge-success">{{ $transmittal->status }}</span>
+                @elseif ($transmittal->status == 'delivered')
+                  <span class="badge badge-info">{{ $transmittal->status }}</span>
                 @endif
               </h4>
               <div class="card-header-action">
@@ -220,7 +220,17 @@
           </div>
           <div class="modal-footer bg-whitesmoke br">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Save changes</button>
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">Save</button>
+              <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split d-none"
+                data-toggle="dropdown" id="dd-button">
+                {{-- <span class="sr-only">Toggle Dropdown</span> --}}
+              </button>
+              <div class="dropdown-menu bg-success">
+                <button class="dropdown-item btn-success" type="submit" name="receive_button" value="receive"><i
+                    class="fas fa-file-signature"></i> Save & Received</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -262,13 +272,24 @@
               </div>
               <div class="form-group">
                 <label>Remarks</label>
-                <textarea name="delivery_remarks" id="delivery_remarks_{{ $delivery->id }}" cols="30" rows="5" class="form-control"
-                  required>{{ $delivery->delivery_remarks }}</textarea>
+                <textarea name="delivery_remarks" id="delivery_remarks_{{ $delivery->id }}" cols="30" rows="5"
+                  class="form-control" required>{{ $delivery->delivery_remarks }}</textarea>
               </div>
             </div>
             <div class="modal-footer bg-whitesmoke br">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button"
+                  class="btn btn-primary dropdown-toggle dropdown-toggle-split @if ($delivery->delivery_status == 'send') d-none @endif"
+                  data-toggle="dropdown" id="dd-button-{{ $delivery->id }}">
+                  {{-- <span class="sr-only">Toggle Dropdown</span> --}}
+                </button>
+                <div class="dropdown-menu bg-success">
+                  <button class="dropdown-item btn-success" type="submit" name="receive_button" value="receive"><i
+                      class="fas fa-file-signature"></i> Save & Received</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -285,21 +306,26 @@
       'Received by : ' + '\n' +
       'Contact : ' + '\n' +
       'Other information : ';
+
     document.getElementById('delivery_remarks').value = sendTemplate;
 
     function addTemplate(el) {
       if (el.value == 'send') {
         document.getElementById('delivery_remarks').value = sendTemplate;
+        document.getElementById('dd-button').classList.add('d-none');
       } else {
         document.getElementById('delivery_remarks').value = receiveTemplate;
+        document.getElementById('dd-button').classList.remove('d-none');
       }
     }
 
     function editTemplate(el) {
       if (document.getElementById('delivery_status_' + el).value == 'send') {
         document.getElementById('delivery_remarks_' + el).value = sendTemplate;
+        document.getElementById('dd-button-' + el).classList.add('d-none');
       } else if (document.getElementById('delivery_status_' + el).value == 'receive') {
         document.getElementById('delivery_remarks_' + el).value = receiveTemplate;
+        document.getElementById('dd-button-' + el).classList.remove('d-none');
       }
     }
   </script>
