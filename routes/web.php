@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function(){
     Route::get('transmittals/restore/{id?}', [TransmittalController::class, 'restore'])->middleware('admin');
     Route::get('transmittals/delete/{id?}', [TransmittalController::class, 'delete'])->middleware('admin');
     Route::get('transmittals/print/{id?}', [TransmittalController::class, 'print']);
+    Route::get('transmittals/email/{id?}', [TransmittalController::class, 'email']);
     Route::post('transmittals/delivery/{id?}', [TransmittalController::class, 'add_delivery']);
     Route::put('transmittals/{transmittal_id?}/delivery/{id?}', [TransmittalController::class, 'edit_delivery']);
     Route::get('transmittals/{transmittal_id?}/delivery/delete/{id?}', [TransmittalController::class, 'delete_delivery']);
