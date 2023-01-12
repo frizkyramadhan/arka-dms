@@ -124,10 +124,10 @@
                             {{ $transmittal->attn }}
                           @endif
                         </address>
-                        <address style="font-size: 12pt">
+                        {{-- <address style="font-size: 12pt">
                           <strong>Received Date:</strong><br>
                           {{ $transmittal->received_date != null ? date('d-M-Y', strtotime($transmittal->received_date)) : '' }}
-                        </address>
+                        </address> --}}
                       </div>
                     </div>
                   </div>
