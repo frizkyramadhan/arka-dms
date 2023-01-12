@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TransmittalDelivery;
 use App\Models\User;
 use App\Models\Project;
 use App\Models\Delivery;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use App\Models\TransmittalDetail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TransmittalController extends Controller
 {
@@ -29,6 +31,7 @@ class TransmittalController extends Controller
         // index transmittal
         $title = 'Transmittal Form';
         $subtitle = 'List of Transmittal Form';
+        
         // $transmittals = Transmittal::with(['project'])->orderBy('receipt_no', 'desc')->get();
         return view('transmittals.index', compact('title', 'subtitle'));
     }
@@ -207,6 +210,7 @@ class TransmittalController extends Controller
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
         $transmittal = Transmittal::with(['project','user','receiver'])->withTrashed()->where('id', $id)->first();
         // dd($transmittal);
+
         return view('transmittals.show', compact('title', 'subtitle', 'transmittal','details','deliveries'));
     }
 
@@ -390,6 +394,20 @@ class TransmittalController extends Controller
         $delivery->user_id = auth()->user()->id;
         $delivery->save();
 
+        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $transmittal_id)->first();
+        $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
+        $cc = [];
+        foreach($deliveries as $key => $delivery){
+            $email = [];
+            $email['email'] = $delivery->user->email;
+            $email['name'] = $delivery->user->full_name;
+            $cc[$key] = (object) $email;
+        }
+
+        Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
+            ->cc($cc)
+            ->send(new TransmittalDelivery($transmittals, $deliveries));
+
         return redirect('transmittals/'.$transmittal_id)->with('delivery_status', 'Delivery status has been added!');
     }
     
@@ -410,6 +428,20 @@ class TransmittalController extends Controller
             'delivery_remarks' => $request->delivery_remarks,
             'user_id' => auth()->user()->id
         ]);
+
+        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $transmittal_id)->first();
+        $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
+        $cc = [];
+        foreach($deliveries as $key => $delivery){
+            $email = [];
+            $email['email'] = $delivery->user->email;
+            $email['name'] = $delivery->user->full_name;
+            $cc[$key] = (object) $email;
+        }
+
+        Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
+            ->cc($cc)
+            ->send(new TransmittalDelivery($transmittals, $deliveries));
 
         return redirect('transmittals/'.$transmittal_id)->with('delivery_status', 'Delivery status has been updated!');
 
@@ -463,5 +495,25 @@ class TransmittalController extends Controller
                 ->addColumn('action', 'transmittals.action')
                 ->rawColumns(['status','action'])
                 ->toJson();
+    }
+
+    public function email($id)
+    {
+        // send email notification to user
+        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $id)->first();
+        $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
+
+        $cc = [];
+        foreach($deliveries as $key => $delivery){
+            $email = [];
+            $email['email'] = $delivery->user->email;
+            $email['name'] = $delivery->user->full_name;
+            $cc[$key] = (object) $email;
+        }
+
+        Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
+            ->cc($cc)
+            ->send(new TransmittalDelivery($transmittals, $deliveries));
+        return new TransmittalDelivery($transmittals, $deliveries);
     }
 }

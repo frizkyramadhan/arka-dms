@@ -13,6 +13,8 @@
             class="btn btn-icon icon-left btn-light"><i class="fas fa-search-location"></i> Track</a>
           <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit"
             class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
+          <a href="{{ url('transmittals/email/' . $transmittal->id) }}" title="Email"
+            class="btn btn-icon icon-left btn-light"><i class="far fa-envelope"></i> Email</a>
         @else
           <a href="{{ url('transmittals/trash') }}" class="btn btn-icon btn-primary"><i
               class="fas fa-arrow-alt-circle-left"></i>
@@ -122,10 +124,10 @@
                             {{ $transmittal->attn }}
                           @endif
                         </address>
-                        <address style="font-size: 12pt">
+                        {{-- <address style="font-size: 12pt">
                           <strong>Received Date:</strong><br>
                           {{ $transmittal->received_date != null ? date('d-M-Y', strtotime($transmittal->received_date)) : '' }}
-                        </address>
+                        </address> --}}
                       </div>
                     </div>
                   </div>
@@ -139,7 +141,9 @@
             <div class="card-header">
               <h4>Delivery Details</h4>
               <div class="card-header-action">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Add</button>
+                @if ($transmittal->status != 'delivered')
+                  <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Add</button>
+                @endif
               </div>
             </div>
             <div class="card-body">
@@ -173,7 +177,9 @@
                       </td>
                       <td class="text-center">{{ $delivery->delivery_status }}</td>
                       <td>{{ date('d-F-Y H:m', strtotime($delivery->delivery_date)) }}</td>
-                      <td>{{ $delivery->user->full_name }}</td>
+                      <td>
+                        {{ $delivery->user->full_name }}<br>{{ $delivery->user->project->project_code }}
+                      </td>
                       <td style="white-space: pre">{{ $delivery->delivery_remarks }}</td>
                     </tr>
                   @endforeach
