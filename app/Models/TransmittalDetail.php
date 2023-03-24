@@ -12,7 +12,7 @@ class TransmittalDetail extends Model
     // use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['transmittal_id','qty','title','remarks'];
+    protected $fillable = ['transmittal_id', 'description', 'qty', 'uom', 'remarks'];
 
     public function transmittal()
     {

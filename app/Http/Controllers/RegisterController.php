@@ -13,10 +13,10 @@ class RegisterController extends Controller
     public function index()
     {
         $title = 'Register';
-        $subtitle = 'Register - ARKA Document Manager';
+        $subtitle = 'Register - ARKA Delivery Management System';
         $projects = Project::orderBy('project_code', 'asc')->get();
         $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
-        return view('register', compact('title', 'subtitle', 'projects','departments'));
+        return view('register', compact('title', 'subtitle', 'projects', 'departments'));
     }
 
     public function store(Request $request)
@@ -28,7 +28,7 @@ class RegisterController extends Controller
             'project_id' => 'required',
             'department_id' => 'required',
             'level' => 'required'
-        ],[
+        ], [
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
             'password.required' => 'Password is required',
@@ -40,7 +40,7 @@ class RegisterController extends Controller
 
         User::create($validatedData);
         // $data->assignRole('operator');
-        
+
         return redirect('login')->with('status', 'Registration successfull! Please login.');
     }
 }

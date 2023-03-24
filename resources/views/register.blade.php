@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>{{ $title }} - ARKA Document Manager</title>
+  <title>{{ $title }} - ARKA Delivery Management System</title>
 
   <!-- General CSS Files -->
   <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
@@ -13,6 +13,9 @@
   <!-- Template CSS -->
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+
+  {{-- Pace --}}
+  <link rel="stylesheet" href="{{ asset('assets/css/pace-flat-top.css') }}">
 </head>
 
 <body>
@@ -35,26 +38,23 @@
                   @csrf
                   <div class="form-group">
                     <label for="full_name">Full Name</label>
-                    <input id="full_name" type="full_name" class="form-control @error('full_name') is-invalid @enderror"
-                      name="full_name" value="{{ old('full_name') }}" autofocus>
+                    <input id="full_name" type="full_name" class="form-control @error('full_name') is-invalid @enderror" name="full_name" value="{{ old('full_name') }}" autofocus>
                     @error('full_name')
-                      <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
                   <div class="form-group">
                     <label for="email">Email</label>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
-                      name="email" value="{{ old('email') }}">
+                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}">
                     @error('email')
-                      <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
                   <div class="form-group">
                     <label for="password" class="d-block">Password</label>
-                    <input id="password" type="password"
-                      class="form-control pwstrength @error('password') is-invalid @enderror" name="password">
+                    <input id="password" type="password" class="form-control pwstrength @error('password') is-invalid @enderror" name="password">
                     @error('password')
-                      <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
                   <div class="form-group">
@@ -62,13 +62,12 @@
                     <select class="form-control @error('project_id') is-invalid @enderror" name="project_id">
                       <option value="">- Select Project -</option>
                       @foreach ($projects as $item)
-                        <option value="{{ $item->id }}"
-                          {{ old('project_id') == $item->id ? 'selected' : null }}>
-                          {{ $item->project_code }} : {{ $item->project_name }}</option>
+                      <option value="{{ $item->id }}" {{ old('project_id') == $item->id ? 'selected' : null }}>
+                        {{ $item->project_code }} : {{ $item->project_name }}</option>
                       @endforeach
                     </select>
                     @error('project_id')
-                      <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
                   <div class="form-group">
@@ -76,13 +75,12 @@
                     <select class="form-control @error('department_id') is-invalid @enderror" name="department_id">
                       <option value="">- Select Deparment -</option>
                       @foreach ($departments as $item)
-                        <option value="{{ $item->id }}"
-                          {{ old('department_id') == $item->id ? 'selected' : null }}>
-                          {{ $item->dept_name }}</option>
+                      <option value="{{ $item->id }}" {{ old('department_id') == $item->id ? 'selected' : null }}>
+                        {{ $item->dept_name }}</option>
                       @endforeach
                     </select>
                     @error('department_id')
-                      <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
                   <input type="hidden" class="form-control" name="level" value="user">
@@ -98,7 +96,7 @@
               Already have an account? <a href="{{ url('login') }}">Login!</a>
             </div>
             <div class="simple-footer">
-              Copyright &copy; IT Department 2022
+              Copyright &copy; IT Department 2023
             </div>
           </div>
         </div>
@@ -113,6 +111,7 @@
   <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
   <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
   <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
+  <script src="{{ asset('assets/modules/pace/pace.min.js') }}"></script>
   <script src="{{ asset('assets/js/stisla.js') }}"></script>
 
   <!-- JS Libraies -->

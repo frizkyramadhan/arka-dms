@@ -11,17 +11,13 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
     public function index()
     {
-        // if(auth()->user()->level != 'administrator') {
-        //     return view('errors.403');
-        // }
-
         $title = 'Users';
         $subtitle = 'Users Data';
         $users = User::with('project')->orderBy('full_name', 'asc')->get();
@@ -39,7 +35,7 @@ class UserController extends Controller
         $subtitle = 'Add Users Data';
         $projects = Project::orderBy('project_code', 'asc')->get();
         $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
-        return view('users.create', compact('title', 'subtitle', 'projects','departments'));
+        return view('users.create', compact('title', 'subtitle', 'projects', 'departments'));
     }
 
     /**
@@ -57,7 +53,7 @@ class UserController extends Controller
             'project_id' => 'required',
             'department_id' => 'required',
             'level' => 'required'
-        ],[
+        ], [
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
             'password.required' => 'Password is required',
@@ -69,7 +65,7 @@ class UserController extends Controller
 
         User::create($validatedData);
         // $data->assignRole('operator');
-        
+
         return redirect('users')->with('status', 'User added successfully!');
     }
 
@@ -113,13 +109,13 @@ class UserController extends Controller
             'full_name' => 'required',
             'project_id' => 'required',
             'department_id' => 'required'
-        ],[
+        ], [
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',
             'project_id.required' => 'Project is required',
             'department_id.required' => 'Department is required'
         ]);
-        
+
         $input = $request->all();
         $user = User::find($id);
 
@@ -127,17 +123,17 @@ class UserController extends Controller
             $rules['email'] = 'required|email:dns|unique:users|ends_with:@arka.co.id';
         }
 
-        if(!empty($input['password'])){ 
+        if (!empty($input['password'])) {
             $input['password'] = Hash::make($input['password']);
-        }else{
-            $input = Arr::except($input,array('password'));    
+        } else {
+            $input = Arr::except($input, array('password'));
         }
 
         $user->update($input);
 
         // DB::table('model_has_roles')->where('model_id',$id)->delete();
         // $user->assignRole($request->input('roles'));
-        
+
         return redirect('users')->with('status', 'User edited successfully');
     }
 

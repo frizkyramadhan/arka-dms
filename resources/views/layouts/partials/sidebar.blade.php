@@ -1,10 +1,10 @@
 <div class="main-sidebar sidebar-style-2">
   <aside id="sidebar-wrapper">
     <div class="sidebar-brand">
-      <a href="{{ url('/') }}">ARKA Doc Manager</a>
+      <a href="{{ url('/') }}">ARKA DMS</a>
     </div>
     <div class="sidebar-brand sidebar-brand-sm">
-      <a href="{{ url('/') }}">ADM</a>
+      <a href="{{ url('/') }}">DMS</a>
     </div>
     <ul class="sidebar-menu">
       <li class="menu-header">Dashboard</li>
@@ -23,32 +23,22 @@
         </a>
       </li>
       @can('admin')
-        <li class="menu-header">Administrator</li>
-        <li class="{{ Request::is('companies*') ? 'active' : '' }}">
-          <a class="nav-link" href="{{ url('companies') }}"><i class="fas fa-building"></i>
-            <span>Company Settings</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('series*') ? 'active' : '' }}">
-          <a class="nav-link" href="{{ url('series') }}"><i class="fas fa-hashtag"></i>
-            <span>Series</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('users*') ? 'active' : '' }}">
-          <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
-            <span>Users</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('departments*') ? 'active' : '' }}">
-          <a class="nav-link" href="{{ url('departments') }}"><i class="fas fa-layer-group"></i>
-            <span>Department</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('projects*') ? 'active' : '' }}">
-          <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
-            <span>Project</span>
-          </a>
-        </li>
+      <li class="menu-header">Administrator</li>
+      <li class="{{ Request::is('users*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+      </li>
+      <li class="{{ Request::is('departments*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('departments') }}"><i class="fas fa-layer-group"></i>
+          <span>Department</span>
+        </a>
+      </li>
+      <li class="{{ Request::is('projects*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
+          <span>Project</span>
+        </a>
+      </li>
       @endcan
   </aside>
 </div>

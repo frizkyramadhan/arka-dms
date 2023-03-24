@@ -16,111 +16,107 @@ use Illuminate\Support\Facades\Mail;
 
 class TransmittalController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->authorizeResource(Transmittal::class);
-    // }
+    public function __construct()
+    {
+        $this->middleware('admin')->only(['trash', 'restore', 'delete']);
+    }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         // index transmittal
         $title = 'Transmittal Form';
         $subtitle = 'List of Transmittal Form';
-        
+
         // $transmittals = Transmittal::with(['project'])->orderBy('receipt_no', 'desc')->get();
         return view('transmittals.index', compact('title', 'subtitle'));
     }
-    
+
     public function getTransmittals(Request $request)
     {
         $user = auth()->user();
-        if($request->ajax()){
-            if($user->level == 'administrator'){
+        if ($request->ajax()) {
+            if ($user->level == 'administrator') {
                 $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
                     ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
                     ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
-                    ->select(['transmittals.*', 'projects.project_code','receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
+                    ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
                     ->orderBy('transmittals.receipt_no', 'desc');
             } else {
                 $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
                     ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
                     ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
-                    ->select(['transmittals.*', 'projects.project_code','receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
-                    ->where('creators.department_id', $user->department_id)
+                    ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
+                    // ->where('creators.department_id', $user->department_id)
                     // ->where('creators.project_id', $user->project_id) // comment to make this transmittal all project
+                    ->where('creators.id', $user->id)
                     ->orderBy('transmittals.receipt_no', 'desc');
             }
             return DataTables::of($transmittals)
                 ->addIndexColumn()
-                ->addColumn('receipt_full_no', function($transmittals){
+                ->addColumn('receipt_full_no', function ($transmittals) {
                     return $transmittals->receipt_full_no;
                 })
-                ->addColumn('receipt_date', function($transmittals){
+                ->addColumn('receipt_date', function ($transmittals) {
                     return date('d-M-Y', strtotime($transmittals->receipt_date));
                 })
-                ->addColumn('created_by', function($transmittals){
+                ->addColumn('created_by', function ($transmittals) {
                     return $transmittals->user->full_name;
                 })
-                ->addColumn('to', function($transmittals){
-                    if($transmittals->project_id == null){
+                ->addColumn('to', function ($transmittals) {
+                    if ($transmittals->project_id == null) {
                         return $transmittals->to;
                     } else {
                         return $transmittals->project->project_code;
                     }
                 })
-                ->addColumn('attn', function($transmittals){
-                    if($transmittals->attn == null){
+                ->addColumn('attn', function ($transmittals) {
+                    if ($transmittals->attn == null) {
                         return $transmittals->receiver->full_name;
                     } else {
                         return $transmittals->attn;
                     }
                 })
-                ->addColumn('status', function($transmittals){
-                    if ($transmittals->status == 'published'){
-                        return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
-                    } elseif ($transmittals->status == 'on delivery'){
-                        return '<span class="badge badge-success">'. $transmittals->status .'</span>';
-                    } elseif ($transmittals->status == 'delivered'){
-                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
+                ->addColumn('status', function ($transmittals) {
+                    if ($transmittals->status == 'published') {
+                        return '<span class="badge badge-warning">' . $transmittals->status . '</span>';
+                    } elseif ($transmittals->status == 'on delivery') {
+                        return '<span class="badge badge-success">' . $transmittals->status . '</span>';
+                    } elseif ($transmittals->status == 'delivered') {
+                        return '<span class="badge badge-info">' . $transmittals->status . '</span>';
                     }
                 })
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
-                            $instance->where(function($w) use($request){
+                        $instance->where(function ($w) use ($request) {
                             $search = $request->get('search');
                             $w->orWhere('receipt_full_no', 'LIKE', "%$search%")
-                            ->orWhere('receipt_date', 'LIKE', "%$search%")
-                            ->orWhere('project_code', 'LIKE', "%$search%")
-                            ->orWhere('to', 'LIKE', "%$search%")
-                            ->orWhere('attn', 'LIKE', "%$search%")
-                            ->orWhere('creators.full_name', 'LIKE', "%$search%")
-                            ->orWhere('receivers.full_name', 'LIKE', "%$search%")
-                            ->orWhere('status', 'LIKE', "%$search%");
+                                ->orWhere('receipt_date', 'LIKE', "%$search%")
+                                ->orWhere('project_code', 'LIKE', "%$search%")
+                                ->orWhere('to', 'LIKE', "%$search%")
+                                ->orWhere('attn', 'LIKE', "%$search%")
+                                ->orWhere('creators.full_name', 'LIKE', "%$search%")
+                                ->orWhere('receivers.full_name', 'LIKE', "%$search%")
+                                ->orWhere('status', 'LIKE', "%$search%");
                         });
                     }
                 })
                 ->addColumn('action', 'transmittals.action')
-                ->rawColumns(['status','action'])
+                ->rawColumns(['status', 'action'])
                 ->toJson();
         }
     }
 
     public function getReceiver()
     {
-        $receivers = User::whereHas('project', function($query){
-                        $query->whereId(request()->input('project_id', 0));
-                    })
-                    ->whereHas('department', function($query){
-                        $query->whereId(request()->input('department_id', 0));
-                    })
-                    // ->where('level', '!=', 'administrator')
-                    ->orderBy('full_name', 'asc')
-                    ->pluck('full_name', 'id');
+        $receivers = User::whereHas('project', function ($query) {
+            $query->whereId(request()->input('project_id', 0));
+        })
+            ->whereHas('department', function ($query) {
+                $query->whereId(request()->input('department_id', 0));
+            })
+            // ->where('level', '!=', 'administrator')
+            ->orderBy('full_name', 'asc')
+            ->pluck('full_name', 'id');
 
         return response()->json($receivers);
     }
@@ -151,14 +147,26 @@ class TransmittalController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {        
-        // dd($request->all());
+    {
+        $receipt_no = $request->input('receipt_no');
+
+        // Check if receipt_no already exists in the receipt table
+        if (Transmittal::where('receipt_no', $receipt_no)->exists()) {
+            // Generate new receipt_no
+            do {
+                $new_receipt_no = static::generateReceiptNo();
+                $new_receipt_full_no = static::generateReceiptFullNo();
+            } while (Transmittal::where('receipt_no', $new_receipt_no)->exists());
+
+            $request->merge(['receipt_no' => $new_receipt_no]);
+            $request->merge(['receipt_full_no' => $new_receipt_full_no]);
+        }
         // validate request
         $request->validate([
             'receipt_no' => 'required|unique:transmittals,receipt_no',
             'receipt_date' => 'required',
             'to' => 'required_if:project_id,null'
-        ],[
+        ], [
             'receipt_no.required' => 'Receipt No. is required',
             'receipt_no.unique' => 'Receipt No. already exists, please try again',
             'receipt_date.required' => 'Receipt Date is required',
@@ -166,7 +174,7 @@ class TransmittalController extends Controller
         ]);
 
         $data = $request->all();
-        if (count($data['qty']) > 0 ){
+        if (count($data['qty']) > 0) {
             // dd($data);
             $transmittal = new Transmittal();
             $transmittal->project_id = $data['project_id'];
@@ -176,16 +184,17 @@ class TransmittalController extends Controller
             $transmittal->receipt_date = $data['receipt_date'];
             $transmittal->to = $data['to'];
             $transmittal->attn = $data['attn'];
-            $transmittal->received_by = $data['received_by'];
+            $transmittal->received_by = $data['received_by'] ?? null;
             $transmittal->status = 'published';
             $transmittal->user_id = auth()->user()->id;
             $transmittal->save();
 
-            foreach($data['qty'] as $detail => $value){
+            foreach ($data['qty'] as $detail => $value) {
                 $details = array(
                     'transmittal_id' => $transmittal->id,
+                    'description' => $data['description'][$detail],
                     'qty' => $data['qty'][$detail],
-                    'title' => $data['title'][$detail],
+                    'uom' => $data['uom'][$detail],
                     'remarks' => $data['remarks'][$detail],
                 );
                 TransmittalDetail::create($details);
@@ -193,6 +202,24 @@ class TransmittalController extends Controller
         }
 
         return redirect('transmittals')->with('status', 'Transmittal Form has been added!');
+    }
+
+    function generateReceiptNo()
+    {
+        $lastReceipt = Transmittal::withTrashed()->max('receipt_no');
+
+        $newNumber = $lastReceipt + 1;
+
+        return $newNumber;
+    }
+    function generateReceiptFullNo()
+    {
+        $lastReceipt = Transmittal::withTrashed()->max('receipt_no');
+
+        $newNumber = $lastReceipt + 1;
+        $newReceiptFullNo = 'TF' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+
+        return $newReceiptFullNo;
     }
 
     /**
@@ -208,10 +235,10 @@ class TransmittalController extends Controller
         $subtitle = 'Transmittal Form Details';
         $details = TransmittalDetail::where('transmittal_id', $id)->get();
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
-        $transmittal = Transmittal::with(['project','user','receiver'])->withTrashed()->where('id', $id)->first();
+        $transmittal = Transmittal::with(['project', 'user', 'receiver'])->withTrashed()->where('id', $id)->first();
         // dd($transmittal);
 
-        return view('transmittals.show', compact('title', 'subtitle', 'transmittal','details','deliveries'));
+        return view('transmittals.show', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries'));
     }
 
     /**
@@ -230,13 +257,13 @@ class TransmittalController extends Controller
         $subtitle = 'Edit Transmittal Form';
         $projects = Project::orderBy('project_code', 'asc')->get();
         $details = TransmittalDetail::where('transmittal_id', $transmittal->id)->get();
-        $transmittal = Transmittal::with(['project','user','receiver'])->findOrFail($transmittal->id);
+        $transmittal = Transmittal::with(['project', 'user', 'receiver'])->findOrFail($transmittal->id);
         $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
         $receivers = User::where('project_id', $transmittal->project_id)
-                        ->where('department_id', $transmittal->department_id)
-                        ->orderBy('full_name', 'asc')
-                        ->get();
-        return view('transmittals.edit', compact('title', 'subtitle', 'projects', 'departments', 'transmittal', 'details','receivers'));
+            ->where('department_id', $transmittal->department_id)
+            ->orderBy('full_name', 'asc')
+            ->get();
+        return view('transmittals.edit', compact('title', 'subtitle', 'projects', 'departments', 'transmittal', 'details', 'receivers'));
     }
 
     /**
@@ -250,10 +277,10 @@ class TransmittalController extends Controller
     {
         $transmittal_details = TransmittalDetail::where('transmittal_id', $transmittal->id)->get();
         foreach ($transmittal_details as $details) {
-            if($request->has('deleteRow'.$details->id)){
+            if ($request->has('deleteRow' . $details->id)) {
                 // delete transmittal detail
                 TransmittalDetail::where('id', $details->id)->delete();
-                return redirect('transmittals/'.$transmittal->id.'/edit')->with('status', 'Record has been deleted successfully!');
+                return redirect('transmittals/' . $transmittal->id . '/edit')->with('status', 'Record has been deleted successfully!');
             }
         }
 
@@ -261,7 +288,7 @@ class TransmittalController extends Controller
             'receipt_no' => 'required',
             'receipt_date' => 'required',
             'to' => 'required_if:project_id,null'
-        ],[
+        ], [
             'receipt_no.required' => 'Receipt No. is required',
             'receipt_date.required' => 'Receipt Date is required',
             'to.required_if' => 'Please fill the recipient'
@@ -278,21 +305,22 @@ class TransmittalController extends Controller
             'received_by' => $request->received_by,
             'user_id' => auth()->user()->id
         ]);
-        
+
         $data = $request->all();
-        if (!empty($request->qty)){
-            foreach($data['qty'] as $detail => $value){
+        if (!empty($request->qty)) {
+            foreach ($data['qty'] as $detail => $value) {
                 $details = array(
                     'transmittal_id' => $transmittal->id,
+                    'description' => $data['description'][$detail],
                     'qty' => $data['qty'][$detail],
-                    'title' => $data['title'][$detail],
+                    'uom' => $data['uom'][$detail],
                     'remarks' => $data['remarks'][$detail],
                 );
                 TransmittalDetail::create($details);
             }
         }
 
-        return redirect('transmittals/'.$transmittal->id)->with('transmittal_status', 'Transmittal Form has been updated!');
+        return redirect('transmittals/' . $transmittal->id)->with('transmittal_status', 'Transmittal Form has been updated!');
     }
 
     /**
@@ -306,7 +334,7 @@ class TransmittalController extends Controller
         // destroy transmittal form and its details
         $this->authorize('delete', $transmittal);
 
-        TransmittalDetail::where('transmittal_id', $transmittal->id)->delete(); 
+        TransmittalDetail::where('transmittal_id', $transmittal->id)->delete();
         Transmittal::where('id', $transmittal->id)->delete();
         return redirect('transmittals')->with('status', 'Transmittal Form has been deleted!');
     }
@@ -317,7 +345,7 @@ class TransmittalController extends Controller
         $detail = TransmittalDetail::findOrFail($id);
         $detail->delete();
 
-        return redirect('transmittals/'.$transmittal_id.'/edit')->with('status', 'Record has been deleted successfully!');
+        return redirect('transmittals/' . $transmittal_id . '/edit')->with('status', 'Record has been deleted successfully!');
     }
 
     public function trash()
@@ -338,15 +366,15 @@ class TransmittalController extends Controller
         $company = DB::table('companies')->first();
         $details = TransmittalDetail::where('transmittal_id', $id)->get();
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
-        $transmittal = Transmittal::with(['project','user'])->withTrashed()->where('id', $id)->first();
-        
-        return view('transmittals.print', compact('title', 'subtitle', 'transmittal','details','deliveries','company'));
+        $transmittal = Transmittal::with(['project', 'user'])->withTrashed()->where('id', $id)->first();
+
+        return view('transmittals.print', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'company'));
     }
 
     public function restore($id = null)
     {
         // restore transmittal form
-        if($id != null){
+        if ($id != null) {
             TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->restore();
             Transmittal::onlyTrashed()->where('id', $id)->restore();
             return redirect('transmittals/trash')->with('status', 'Transmittal Form has been restored!');
@@ -354,12 +382,12 @@ class TransmittalController extends Controller
             TransmittalDetail::onlyTrashed()->restore();
             Transmittal::onlyTrashed()->restore();
             return redirect('transmittals')->with('status', 'Transmittal Form has been restored!');
-        }   
+        }
     }
 
     public function delete($id = null)
     {
-        if($id != null){
+        if ($id != null) {
             TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->forceDelete();
             Transmittal::onlyTrashed()->where('id', $id)->forceDelete();
             return redirect('transmittals/trash')->with('status', 'Transmittal Form has been deleted!');
@@ -374,16 +402,16 @@ class TransmittalController extends Controller
     {
         // dd($request->receive_button);
         // check if transmittal_id is exist in delivery table
-        if(Delivery::where('transmittal_id', $transmittal_id)->doesntExist()){
+        if (Delivery::where('transmittal_id', $transmittal_id)->doesntExist()) {
             // change transmittal status to delivered
             Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
         }
 
-        if($request->receive_button == 'receive'){
+        if ($request->receive_button == 'receive') {
             // change transmittal status to received
             Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
         }
-        
+
         // add delivery process
         $data = $request->all();
         $delivery = new Delivery();
@@ -394,10 +422,10 @@ class TransmittalController extends Controller
         $delivery->user_id = auth()->user()->id;
         $delivery->save();
 
-        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $transmittal_id)->first();
+        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $transmittal_id)->first();
         $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
         $cc = [];
-        foreach($deliveries as $key => $delivery){
+        foreach ($deliveries as $key => $delivery) {
             $email = [];
             $email['email'] = $delivery->user->email;
             $email['name'] = $delivery->user->full_name;
@@ -408,18 +436,18 @@ class TransmittalController extends Controller
             ->cc($cc)
             ->send(new TransmittalDelivery($transmittals, $deliveries));
 
-        return redirect('transmittals/'.$transmittal_id)->with('delivery_status', 'Delivery status has been added!');
+        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been added!');
     }
-    
+
     public function edit_delivery(Request $request, $transmittal_id, $id)
     {
         $this->authorize('update_delivery', [Delivery::class, $id]);
 
-        if($request->receive_button == 'receive'){
+        if ($request->receive_button == 'receive') {
             // change transmittal status to received
             Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
         }
-        
+
         // edit delivery process
         Delivery::where('id', $id)->update([
             'transmittal_id' => $transmittal_id,
@@ -429,10 +457,10 @@ class TransmittalController extends Controller
             'user_id' => auth()->user()->id
         ]);
 
-        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $transmittal_id)->first();
+        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $transmittal_id)->first();
         $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
         $cc = [];
-        foreach($deliveries as $key => $delivery){
+        foreach ($deliveries as $key => $delivery) {
             $email = [];
             $email['email'] = $delivery->user->email;
             $email['name'] = $delivery->user->full_name;
@@ -443,8 +471,7 @@ class TransmittalController extends Controller
             ->cc($cc)
             ->send(new TransmittalDelivery($transmittals, $deliveries));
 
-        return redirect('transmittals/'.$transmittal_id)->with('delivery_status', 'Delivery status has been updated!');
-
+        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been updated!');
     }
 
     public function delete_delivery($transmittal_id, $id)
@@ -453,58 +480,58 @@ class TransmittalController extends Controller
         // delete delivery detail
         Delivery::where('id', $id)->delete();
 
-        return redirect('transmittals/'.$transmittal_id)->with('delivery_status', 'Delivery status has been deleted!');
+        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been deleted!');
     }
 
     public function data()
     {
         $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
-                ->leftJoin('users', 'transmittals.received_by', '=', 'users.id')
-                ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_no', 'desc');
-            return DataTables::of($transmittals)
-                ->addIndexColumn()
-                ->addColumn('receipt_full_no', function($transmittals){
-                    return $transmittals->receipt_full_no;
-                })
-                ->addColumn('receipt_date', function($transmittals){
-                    return date('d-M-Y', strtotime($transmittals->receipt_date));
-                })
-                ->addColumn('to', function($transmittals){
-                    if($transmittals->project_id == null){
-                        return $transmittals->to;
-                    } else {
-                        return $transmittals->project->project_code;
-                    }
-                })
-                ->addColumn('attn', function($transmittals){
-                    if($transmittals->attn == null){
-                        return $transmittals->receiver->full_name;
-                    } else {
-                        return $transmittals->attn;
-                    }
-                })
-                ->addColumn('status', function($transmittals){
-                    if ($transmittals->status == 'published'){
-                        return '<span class="badge badge-warning">'.$transmittals->status.'</span>';
-                    } elseif ($transmittals->status == 'on delivery'){
-                        return '<span class="badge badge-info">'. $transmittals->status .'</span>';
-                    } elseif ($transmittals->status == 'delivered'){
-                        return '<span class="badge badge-success">'. $transmittals->status .'</span>';
-                    }
-                })
-                ->addColumn('action', 'transmittals.action')
-                ->rawColumns(['status','action'])
-                ->toJson();
+            ->leftJoin('users', 'transmittals.received_by', '=', 'users.id')
+            ->select(['transmittals.*', 'projects.project_code'])->orderBy('transmittals.receipt_no', 'desc');
+        return DataTables::of($transmittals)
+            ->addIndexColumn()
+            ->addColumn('receipt_full_no', function ($transmittals) {
+                return $transmittals->receipt_full_no;
+            })
+            ->addColumn('receipt_date', function ($transmittals) {
+                return date('d-M-Y', strtotime($transmittals->receipt_date));
+            })
+            ->addColumn('to', function ($transmittals) {
+                if ($transmittals->project_id == null) {
+                    return $transmittals->to;
+                } else {
+                    return $transmittals->project->project_code;
+                }
+            })
+            ->addColumn('attn', function ($transmittals) {
+                if ($transmittals->attn == null) {
+                    return $transmittals->receiver->full_name;
+                } else {
+                    return $transmittals->attn;
+                }
+            })
+            ->addColumn('status', function ($transmittals) {
+                if ($transmittals->status == 'published') {
+                    return '<span class="badge badge-warning">' . $transmittals->status . '</span>';
+                } elseif ($transmittals->status == 'on delivery') {
+                    return '<span class="badge badge-info">' . $transmittals->status . '</span>';
+                } elseif ($transmittals->status == 'delivered') {
+                    return '<span class="badge badge-success">' . $transmittals->status . '</span>';
+                }
+            })
+            ->addColumn('action', 'transmittals.action')
+            ->rawColumns(['status', 'action'])
+            ->toJson();
     }
 
     public function email($id)
     {
         // send email notification to user
-        $transmittals = Transmittal::with(['project','department','user','receiver'])->withTrashed()->where('id', $id)->first();
+        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $id)->first();
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
 
         $cc = [];
-        foreach($deliveries as $key => $delivery){
+        foreach ($deliveries as $key => $delivery) {
             $email = [];
             $email['email'] = $delivery->user->email;
             $email['name'] = $delivery->user->full_name;
