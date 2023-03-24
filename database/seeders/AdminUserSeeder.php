@@ -22,5 +22,21 @@ class AdminUserSeeder extends Seeder
             'project_id' => 1,
             'department_id' => 7
         ]);
+        User::create([
+            'full_name' => 'Frizky Ramadhan',
+            'email' => 'frizky.ramadhan@arka.co.id',
+            'password' => bcrypt('admin'),
+            'level' => 'administrator',
+            'project_id' => 1,
+            'department_id' => 7
+        ]);
+        User::create([
+            'full_name' => 'Suyanto',
+            'email' => 'suyanto@arka.co.id',
+            'password' => bcrypt('admin'),
+            'level' => 'administrator',
+            'project_id' => 1,
+            'department_id' => 7
+        ]);
     }
 }

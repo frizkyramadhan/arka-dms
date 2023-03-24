@@ -7,18 +7,17 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
     public function index()
     {
         $title = 'Projects';
         $subtitle = 'Project Data';
         $projects = Project::orderBy('project_code', 'asc')->get();
-        return view('projects.index', compact('title','subtitle','projects'));
-
+        return view('projects.index', compact('title', 'subtitle', 'projects'));
     }
 
     /**
@@ -31,7 +30,7 @@ class ProjectController extends Controller
         // create project
         $title = 'Projects';
         $subtitle = 'Add Project Data';
-        return view('projects.create', compact('title','subtitle'));
+        return view('projects.create', compact('title', 'subtitle'));
     }
 
     /**
@@ -47,11 +46,10 @@ class ProjectController extends Controller
             'project_code' => 'required',
             'project_name' => 'required',
         ]);
-        
+
         // store project with erm
         Project::create($request->all());
         return redirect('projects')->with('status', 'Project created successfully');
-
     }
 
     /**
@@ -76,8 +74,7 @@ class ProjectController extends Controller
         // edit project
         $title = 'Projects';
         $subtitle = 'Edit Project Data';
-        return view('projects.edit', compact('title','subtitle','project'));
-
+        return view('projects.edit', compact('title', 'subtitle', 'project'));
     }
 
     /**

@@ -18,9 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ProjectSeeder::class);
         $this->call(DepartmentSeeder::class);
         $this->call(AdminUserSeeder::class);
-        $this->call(SeriesSeeder::class);
 
         User::factory(10)->create();
-        Transmittal::factory(500)->create();
+        // Transmittal::factory(500)->create();
     }
 }

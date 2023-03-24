@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
     public function index()
     {
         $title = 'Departments';
@@ -29,7 +29,7 @@ class DepartmentController extends Controller
     {
         $title = 'Departments';
         $subtitle = 'Add Department';
-        
+
         return view('departments.create', compact('title', 'subtitle'));
     }
 
@@ -75,8 +75,8 @@ class DepartmentController extends Controller
     {
         $title = 'Departments';
         $subtitle = 'Edit Department';
-        
-        return view('departments.edit', compact('title', 'subtitle','department'));
+
+        return view('departments.edit', compact('title', 'subtitle', 'department'));
     }
 
     /**

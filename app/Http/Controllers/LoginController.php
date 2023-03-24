@@ -10,7 +10,7 @@ class LoginController extends Controller
     public function index()
     {
         $title = 'Login';
-        $subtitle = 'Login - ARKA Document Manager';
+        $subtitle = 'Login - ARKA Delivery Management System';
         return view('login', compact('title', 'subtitle'));
     }
 
@@ -19,19 +19,18 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-        ],[
+        ], [
             'email.required' => 'Please fill your email.',
             'password.required' => 'Please fill your password.'
         ]);
 
-        
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended('/');
         } else {
             return back()->with('loginError', 'Login failed!');
         }
-
     }
 
     public function logout()
