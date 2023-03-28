@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -53,4 +54,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('projects', ProjectController::class)->except(['show']);
     Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('units', UnitController::class)->except(['show']);
 });

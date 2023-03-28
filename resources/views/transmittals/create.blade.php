@@ -22,7 +22,7 @@
               <div class="row g-3">
                 <div class="col-md-6 mb-3">
                   <label>Receipt No</label>
-                  <input type="text" name="receipt_no" class="form-control" value="{{ $number }}" autocomplete="off">
+                  <input type="hidden" name="receipt_no" class="form-control" value="{{ $number }}" autocomplete="off">
                   <input type="text" name="receipt_full_no" class="form-control @error('receipt_no') is-invalid @enderror" value="{{ $series }}{{ $receipt_no }}" autocomplete="off" readonly>
                   @error('receipt_no')
                   <div class="invalid-feedback">

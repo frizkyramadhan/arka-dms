@@ -24,6 +24,11 @@
       </li>
       @can('admin')
       <li class="menu-header">Administrator</li>
+      <li class="{{ Request::is('units*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('units') }}"><i class="fas fa-truck"></i>
+          <span>Units</span>
+        </a>
+      </li>
       <li class="{{ Request::is('users*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('users') }}"><i class="fas fa-users"></i>
           <span>Users</span>
@@ -31,12 +36,12 @@
       </li>
       <li class="{{ Request::is('departments*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('departments') }}"><i class="fas fa-layer-group"></i>
-          <span>Department</span>
+          <span>Departments</span>
         </a>
       </li>
       <li class="{{ Request::is('projects*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('projects') }}"><i class="fas fa-project-diagram"></i>
-          <span>Project</span>
+          <span>Projects</span>
         </a>
       </li>
       @endcan
