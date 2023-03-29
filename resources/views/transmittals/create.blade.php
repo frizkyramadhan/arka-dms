@@ -5,7 +5,7 @@
   <div class="section-header">
     <h1>{{ $title }}</h1>
     <div class="section-header-button">
-      <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
+      <a href="{{ url()->previous() }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
         Back</a>
     </div>
   </div>
@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                   <label>Date</label>
-                  <input type="date" class="form-control @error('receipt_date') is-invalid @enderror" name="receipt_date" value="{{ old('receipt_date') }}" autocomplete="off" required>
+                  <input type="date" class="form-control @error('receipt_date') is-invalid @enderror" name="receipt_date" value="{{ old('receipt_date', date('Y-m-d')) }}" autocomplete="off" required>
                   @error('receipt_date')
                   <div class="invalid-feedback">
                     {{ $message }}

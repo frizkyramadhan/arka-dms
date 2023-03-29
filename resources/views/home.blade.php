@@ -65,8 +65,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-12 col-md-5 col-lg-5">
-
+    <div class="col-12 col-md-6 col-lg-6">
       {{-- quick tracking --}}
       <div class="card card-hero">
         <div class="card-header">
@@ -92,54 +91,67 @@
           </div>
         </div>
       </div>
-
-      {{-- project chart --}}
-      <div class="card">
-        <div class="card-header">
-          <h4>Projects</h4>
-        </div>
-        <div class="card-body">
-          <canvas id="project-chart"></canvas>
-        </div>
-      </div>
-
-      {{-- department chart --}}
-      <div class="card">
-        <div class="card-header">
-          <h4>Departments</h4>
-        </div>
-        <div class="card-body">
-          <canvas id="dept-chart"></canvas>
-        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+      <div class="wizard-steps">
+        <a href="{{ url('transmittals/create') }}" style="text-decoration: none; width: 33%">
+          <div class="wizard-step wizard-step-warning">
+            <div class="wizard-step-icon">
+              <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="wizard-step-label">
+              Add Transmittal
+            </div>
+          </div>
+        </a>
+        <a href="{{ url('delivery/send') }}" style="text-decoration: none; width: 33%">
+          <div class="wizard-step wizard-step-success">
+            <div class="wizard-step-icon">
+              <i class="fas fa-shipping-fast"></i>
+            </div>
+            <div class="wizard-step-label">
+              Send Transmittal
+            </div>
+          </div>
+        </a>
+        <a href="{{ url('delivery/receive') }}" style="text-decoration: none; width: 33%">
+          <div class="wizard-step wizard-step-info">
+            <div class="wizard-step-icon">
+              <i class="fas fa-file-signature"></i>
+            </div>
+            <div class="wizard-step-label">
+              Receive Transmittal
+            </div>
+          </div>
+        </a>
       </div>
     </div>
-    <div class="col-12 col-md-7 col-lg-7">
-
-      {{-- transmittal form on delivery --}}
-      <div class="card">
+    <div class="col-12 col-md-6 col-lg-6">
+      {{-- transmittal to user --}}
+      <div class="card card-primary">
         <div class="card-header">
-          <h4>{{ $tf_subtitle }}</h4>
+          <h4>{{ $tfu_subtitle }}</h4>
         </div>
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-striped table-hover table-condensed" id="table-1">
+            <table class="table table-striped table-hover table-condensed" id="to-you">
               <thead>
                 <tr>
                   <th>Receipt</th>
                   <th>Date</th>
-                  <th>Created by</th>
+                  <th>From</th>
                   <th>To</th>
                   <th>Attn</th>
                   <th class="text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
-                @if ($transmittals->count() == 0)
+                @if ($tf_to_user->count() == 0)
                 <tr>
                   <td colspan="6" class="text-center">No Data Available</td>
                 </tr>
                 @endif
-                @foreach ($transmittals as $transmittal)
+                @foreach ($tf_to_user as $transmittal)
                 <tr>
                   <td>{{ $transmittal->receipt_full_no }}</td>
                   <td>{{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}</td>
@@ -169,6 +181,84 @@
         </div>
       </div>
     </div>
+    <div class="col-12 col-md-6 col-lg-6">
+      {{-- transmittal to department --}}
+      <div class="card card-success">
+        <div class="card-header">
+          <h4>{{ $tfd_subtitle }}</h4>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover table-condensed" id="to-dept">
+              <thead>
+                <tr>
+                  <th>Receipt</th>
+                  <th>Date</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Attn</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if ($tf_to_dept->count() == 0)
+                <tr>
+                  <td colspan="6" class="text-center">No Data Available</td>
+                </tr>
+                @endif
+                @foreach ($tf_to_dept as $transmittal)
+                <tr>
+                  <td>{{ $transmittal->receipt_full_no }}</td>
+                  <td>{{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}</td>
+                  <td>{{ $transmittal->user->full_name }}</td>
+                  <td>
+                    @if ($transmittal->project_id == null)
+                    {{ $transmittal->to }}
+                    @else
+                    {{ $transmittal->project->project_code }}
+                    @endif
+                  </td>
+                  <td>
+                    @if ($transmittal->attn == null)
+                    {{ $transmittal->receiver->full_name }}
+                    @else
+                    {{ $transmittal->attn }}
+                    @endif
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url('transmittals/' . $transmittal->id) }}" class="btn btn-icon btn-primary" data-toggle="tooltip" data-placement="top" title="View"><i class="fas fa-eye"></i></a>
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+      {{-- project chart --}}
+      <div class="card card-warning">
+        <div class="card-header">
+          <h4>Projects</h4>
+        </div>
+        <div class="card-body">
+          <canvas id="project-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-6">
+      {{-- department chart --}}
+      <div class="card card-danger">
+        <div class="card-header">
+          <h4>Departments</h4>
+        </div>
+        <div class="card-body">
+          <canvas id="dept-chart"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 @endsection
@@ -189,6 +279,16 @@
 
 <!-- Page Specific JS File -->
 <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
+<script>
+  $(document).ready(function() {
+    $('#to-you').DataTable();
+  });
+  $(document).ready(function() {
+    $('#to-dept').DataTable();
+  });
+
+</script>
+
 <script src="{{ asset('assets/modules/chart.min.js') }}"></script>
 <script>
   const p_labels = [
