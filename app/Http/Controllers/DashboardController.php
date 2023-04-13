@@ -18,14 +18,22 @@ class DashboardController extends Controller
         $user = auth()->user();
         $title = 'Dashboard';
         $tfd_subtitle = 'Sent to Your Department';
-        $tf_to_dept = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
-            ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
-            ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
-            ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
-            ->where('receivers.department_id', $user->department_id)
-            ->where('transmittals.status', '=', 'on delivery')
-            // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
-            ->orderBy('transmittals.receipt_no', 'desc')->get();
+        // $tf_to_dept = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
+        //     ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
+        //     ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
+        //     ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
+        //     ->where('receivers.department_id', $user->department_id)
+        //     ->where('transmittals.status', '=', 'on delivery')
+        //     // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
+        //     ->orderBy('transmittals.receipt_no', 'desc')->get();
+        $tf_to_dept = Transmittal::with(['project', 'receiver', 'user', 'transmittal_details'])
+            ->whereHas('receiver', function ($query) use ($user) {
+                $query->where('department_id', $user->department_id);
+            })
+            ->where('status', 'on delivery')
+            ->orderBy('receipt_no', 'desc')
+            ->get();
+
         $tfu_subtitle = 'Sent to You';
         $tf_to_user = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
             ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')

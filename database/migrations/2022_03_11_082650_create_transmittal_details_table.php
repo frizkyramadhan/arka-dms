@@ -21,7 +21,6 @@ class CreateTransmittalDetailsTable extends Migration
             $table->string('uom');
             $table->string('remarks');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

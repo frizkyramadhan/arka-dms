@@ -26,7 +26,6 @@ class CreateTransmittalsTable extends Migration
             $table->string('attn')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

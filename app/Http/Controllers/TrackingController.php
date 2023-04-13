@@ -15,21 +15,21 @@ class TrackingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
         $title = "Tracking Transmittals";
         $subtitle = "Track Your Transmittals";
-        
-        $trackings = DB::table('deliveries')
-            ->leftJoin('transmittals', 'transmittals.id', '=', 'deliveries.transmittal_id')
-            ->leftJoin('users', 'users.id', '=', 'deliveries.user_id')
-            ->select('deliveries.*', 'transmittals.receipt_full_no', 'users.full_name')
-            ->when($request->search, function($query) use ($request){
-            return $query->where('transmittals.receipt_full_no', 'like', '%'.$request->search.'%');
-            })
-            ->orderBy('id', 'desc')->get();
-        
-        return view('trackings.index', compact('title', 'subtitle', 'trackings','request'));
+
+        // $trackings = DB::table('deliveries')
+        //     ->leftJoin('transmittals', 'transmittals.id', '=', 'deliveries.transmittal_id')
+        //     ->leftJoin('users', 'users.id', '=', 'deliveries.user_id')
+        //     ->select('deliveries.*', 'transmittals.receipt_full_no', 'users.full_name')
+        //     ->when($request->search, function($query) use ($request){
+        //     return $query->where('transmittals.receipt_full_no', 'like', '%'.$request->search.'%');
+        //     })
+        //     ->orderBy('id', 'desc')->get();
+
+        return view('trackings.index', compact('title', 'subtitle'));
     }
 
     // public function json_trackings()

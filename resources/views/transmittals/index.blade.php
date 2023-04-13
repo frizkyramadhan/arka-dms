@@ -7,10 +7,10 @@
     <div class="section-header-button">
       <a href="{{ url('transmittals/create') }}" class="btn btn-icon btn-primary"><i class="fas fa-plus"></i> Add
         New</a>
-      @can('admin')
+      {{-- @can('admin')
       <a href="{{ url('transmittals/trash') }}" class="btn btn-icon btn-danger"><i class="fas fa-trash-alt"></i>
-        Trash</a>
-      @endcan
+      Trash</a>
+      @endcan --}}
     </div>
   </div>
   <div class="section-body">
@@ -32,12 +32,11 @@
                   <tr>
                     <th class="text-center" width="8%">#</th>
                     <th>Receipt No</th>
+                    <th class="text-center">Status</th>
                     <th>Date</th>
                     <th>Created by</th>
                     <th>To</th>
                     <th>Attn</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center" width="20%">Action</th>
                   </tr>
                 </thead>
                 {{-- <tbody>
@@ -103,7 +102,7 @@
 <!-- Page Specific JS File -->
 <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
 
-<script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
+{{-- <script src="{{ asset('assets/modules/jquery.min.js') }}"></script> --}}
 <script src="{{ asset('assets/modules/datatables/datatables.min.js') }}"></script>
 <script>
   $(function() {
@@ -124,8 +123,13 @@
           , className: 'text-center'
         }
         , {
-          data: 'receipt_full_no'
-          , name: 'receipt_full_no'
+          data: 'action'
+          , name: 'action'
+        }
+        , {
+          data: 'status'
+          , name: 'status'
+          , className: 'text-center'
         }
         , {
           data: 'receipt_date'
@@ -143,18 +147,13 @@
           data: 'attn'
           , name: 'attn'
         }
-        , {
-          data: 'status'
-          , name: 'status'
-          , className: 'text-center'
-        }
-        , {
-          data: 'action'
-          , name: 'action'
-          , orderable: false
-          , searchable: false
-          , className: 'text-center'
-        }
+        //, {
+        //  data: 'action'
+        //  , name: 'action'
+        //  , orderable: false
+        //  , searchable: false
+        //  , className: 'text-center'
+        //}
       , ]
       , fixedHeader: true
     , });

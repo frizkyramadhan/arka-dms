@@ -8,13 +8,11 @@ use App\Models\Project;
 use App\Models\Department;
 use App\Models\TransmittalDetail;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transmittal extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use Uuids;
 
     protected $guarded = [];

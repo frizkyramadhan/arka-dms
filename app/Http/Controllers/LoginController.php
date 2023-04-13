@@ -10,7 +10,7 @@ class LoginController extends Controller
     public function index()
     {
         $title = 'Login';
-        $subtitle = 'Login - ARKA Delivery Management System';
+        $subtitle = 'ARKA Delivery Management System';
         return view('login', compact('title', 'subtitle'));
     }
 

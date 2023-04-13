@@ -5,12 +5,10 @@ namespace App\Models;
 use App\Models\Transmittal;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TransmittalDetail extends Model
 {
-    // use HasFactory;
-    use SoftDeletes;
+    use HasFactory;
 
     protected $fillable = ['transmittal_id', 'description', 'qty', 'uom', 'remarks'];
 

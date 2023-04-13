@@ -36,7 +36,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6 col-12">
       <div class="card card-statistic-1">
         <div class="card-icon bg-success">
-          <i class="fas fa-truck"></i>
+          <i class="fas fa-shipping-fast"></i>
         </div>
         <div class="card-wrap">
           <div class="card-header">
@@ -77,16 +77,17 @@
         <div class="card-body p-0">
           <div class="tickets-list">
             <div class="ticket-item">
-              <form action="{{ url('trackings') }}" method="get">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    <input id="search" type="text" class="form-control" placeholder="Transmittal No." name="search" value="{{ request('search') }}" autofocus autocomplete="off">
-                    <div class="input-group-append">
-                      <button class="btn btn-primary" type="submit">Search</button>
-                    </div>
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" aria-label="" placeholder="Transmittal No." id="receipt-no" value="" autofocus>
+                  <div class="input-group-append">
+                    <button class="btn btn-primary btn-icon" type="button" id="search-btn"><i class="fas fa-search"></i> Search</button>
                   </div>
                 </div>
-              </form>
+              </div>
+              <div id="delivery-history">
+
+              </div>
             </div>
           </div>
         </div>
@@ -100,11 +101,11 @@
               <i class="fas fa-file-invoice"></i>
             </div>
             <div class="wizard-step-label">
-              Add Transmittal
+              Create Transmittal
             </div>
           </div>
         </a>
-        <a href="{{ url('delivery/send') }}" style="text-decoration: none; width: 33%">
+        <a href="{{ url('deliveries/send') }}" style="text-decoration: none; width: 33%">
           <div class="wizard-step wizard-step-success">
             <div class="wizard-step-icon">
               <i class="fas fa-shipping-fast"></i>
@@ -114,7 +115,7 @@
             </div>
           </div>
         </a>
-        <a href="{{ url('delivery/receive') }}" style="text-decoration: none; width: 33%">
+        <a href="{{ url('deliveries/receive') }}" style="text-decoration: none; width: 33%">
           <div class="wizard-step wizard-step-info">
             <div class="wizard-step-icon">
               <i class="fas fa-file-signature"></i>
@@ -134,15 +135,15 @@
         </div>
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-striped table-hover table-condensed" id="to-you">
+            <table class="table table-sm table-striped table-hover table-condensed" id="to-you">
               <thead>
                 <tr>
+                  <th>No</th>
                   <th>Receipt</th>
                   <th>Date</th>
                   <th>From</th>
                   <th>To</th>
                   <th>Attn</th>
-                  <th class="text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,7 +154,10 @@
                 @endif
                 @foreach ($tf_to_user as $transmittal)
                 <tr>
-                  <td>{{ $transmittal->receipt_full_no }}</td>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#transmittalModal-{{ $transmittal->receipt_no }}">{{ $transmittal->receipt_full_no }}</button>
+                  </td>
                   <td>{{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}</td>
                   <td>{{ $transmittal->user->full_name }}</td>
                   <td>
@@ -169,9 +173,6 @@
                     @else
                     {{ $transmittal->attn }}
                     @endif
-                  </td>
-                  <td class="text-center">
-                    <a href="{{ url('transmittals/' . $transmittal->id) }}" class="btn btn-icon btn-primary" data-toggle="tooltip" data-placement="top" title="View"><i class="fas fa-eye"></i></a>
                   </td>
                 </tr>
                 @endforeach
@@ -189,15 +190,15 @@
         </div>
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-striped table-hover table-condensed" id="to-dept">
+            <table class="table table-sm table-striped table-hover table-condensed" id="to-dept">
               <thead>
                 <tr>
+                  <th>No</th>
                   <th>Receipt</th>
                   <th>Date</th>
                   <th>From</th>
                   <th>To</th>
                   <th>Attn</th>
-                  <th class="text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,7 +209,10 @@
                 @endif
                 @foreach ($tf_to_dept as $transmittal)
                 <tr>
-                  <td>{{ $transmittal->receipt_full_no }}</td>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#transmittalModal-{{ $transmittal->receipt_no }}">{{ $transmittal->receipt_full_no }}</button>
+                  </td>
                   <td>{{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}</td>
                   <td>{{ $transmittal->user->full_name }}</td>
                   <td>
@@ -224,9 +228,6 @@
                     @else
                     {{ $transmittal->attn }}
                     @endif
-                  </td>
-                  <td class="text-center">
-                    <a href="{{ url('transmittals/' . $transmittal->id) }}" class="btn btn-icon btn-primary" data-toggle="tooltip" data-placement="top" title="View"><i class="fas fa-eye"></i></a>
                   </td>
                 </tr>
                 @endforeach
@@ -261,13 +262,169 @@
     </div>
   </div>
 </section>
+@foreach ($tf_to_dept as $transmittal)
+<div class="modal fade" tabindex="-1" role="dialog" id="transmittalModal-{{ $transmittal->receipt_no }}">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Transmittal Detail #{{ $transmittal->receipt_full_no }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="invoice-print">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="row">
+                <div class="col-md-6">
+                  <address style="font-size: 12pt">
+                    <strong>Receipt No:</strong><br>
+                    # {{ $transmittal->receipt_full_no }}
+                  </address>
+                  <address style="font-size: 12pt">
+                    <strong>Date:</strong><br>
+                    {{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}
+                  </address>
+                  <address style="font-size: 12pt">
+                    <strong>Created by:</strong><br>
+                    {{ $transmittal->user->full_name }}
+                  </address>
+                </div>
+                <div class="col-md-6 text-md-right">
+                  <address style="font-size: 12pt">
+                    <strong>To:</strong><br>
+                    @if (empty($transmittal->project_id))
+                    {{ $transmittal->to }}
+                    @else
+                    {{ $transmittal->project->project_code }} - {{ $transmittal->project->project_name }}
+                    @endif
+                  </address>
+                  <address style="font-size: 12pt">
+                    <strong>Attn:</strong><br>
+                    @if (empty($transmittal->attn))
+                    {{ $transmittal->receiver->full_name }}
+                    @else
+                    {{ $transmittal->attn }}
+                    @endif
+                  </address>
+                  <address style="font-size: 12pt">
+                    <strong>Received by:</strong><br>
+                    @if (empty($transmittal->attn))
+                    {{ $transmittal->receiver->full_name }}
+                    @else
+                    {{ $transmittal->attn }}
+                    @endif
+                  </address>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-0">
+            <div class="col-md-12">
+              <div class="section-title text-center"><strong>Transmittal Detail</strong></div>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered">
+                  <tr>
+                    <th style="width:55%">Description</th>
+                    <th style="width:12%" class="text-center">Qty</th>
+                    <th style="width:12%" class="text-center">UoM</th>
+                    <th>Remarks</th>
+                  </tr>
+                  @foreach ($transmittal->transmittal_details as $detail)
+                  <tr>
+                    <td style="white-space: pre">{{ $detail->description }}</td>
+                    <td style="white-space: pre" class="text-center">{{ $detail->qty }}</td>
+                    <td style="white-space: pre" class="text-center">{{ $detail->uom }}</td>
+                    <td style="white-space: pre">{{ $detail->remarks }}</td>
+                  </tr>
+                  @endforeach
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#receiveModal-{{ $transmittal->receipt_no }}">Receive</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="receiveModal-{{ $transmittal->receipt_no }}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{{ url('deliveries' ) }}" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">Receive Transmittal #{{ $transmittal->receipt_full_no }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="invoice-print">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="col-md-12">
+                    <input type="hidden" name="delivery_type" class="form-control" value="receive">
+                    @csrf
+                    <input type="hidden" id="transmittal-id" name="transmittal_id" class="form-control" value="{{ $transmittal->id }}">
+                    <div class="form-group">
+                      <label>Receive By</label>
+                      <input type="text" class="form-control" value="{{ auth()->user()->full_name }}" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>Date</label>
+                      <input type="datetime-local" id="datetime{{ $transmittal->receipt_no }}" name="delivery_date" class="form-control" value="{{ old('delivery_date') }}" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Receive From</label>
+                      <input type="text" class="form-control" name="delivery_to" value="{{ old('delivery_to') }}" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Remarks</label>
+                      <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="6">{{ old('delivery_remarks') }}</textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>Image <small class="text-danger">*optional</small></label>
+                      <input type="file" class="form-control" name="image">
+                    </div>
+                    <div class="form-group">
+                      <div class="control-label">Complete This Delivery?</div>
+                      <label class="custom-switch mt-2">
+                        <input id="is-delivered{{ $transmittal->receipt_no }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
+                        <span class="custom-switch-indicator"></span>
+                        <span id="yes{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                        <span id="no{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-whitesmoke br">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-info">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endforeach
 @endsection
 
 @section('styles')
 <!-- CSS Libraries -->
+<link rel="stylesheet" href="{{ asset('assets/modules/prism/prism.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/modules/datatables/datatables.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/modules/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/modules/datatables/Select-1.2.4/css/select.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/modules/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+
 @endsection
 
 @section('scripts')
@@ -278,6 +435,7 @@
 <script src="{{ asset('assets/modules/jquery-ui/jquery-ui.min.js') }}"></script>
 
 <!-- Page Specific JS File -->
+<script src="{{ asset('assets/js/page/bootstrap-modal.js') }}"></script>
 <script src="{{ asset('assets/js/page/modules-datatables.js') }}"></script>
 <script>
   $(document).ready(function() {
@@ -390,6 +548,124 @@
       , }
     , }
   });
+
+</script>
+
+<script>
+  // search 
+  $(document).ready(function() {
+    // script untuk menampilkan data transmittal
+    $('#search-btn').on('click', function(event) {
+      event.preventDefault();
+      performSearch();
+    });
+
+    $('#receipt-no').on('keypress', function(event) {
+      if (event.which === 13) {
+        event.preventDefault();
+        performSearch();
+      }
+    });
+
+    function performSearch() {
+      // Ambil nilai dari inputan
+      const receiptNo = $('#receipt-no').val();
+
+      // Lakukan request ke server menggunakan AJAX dengan jQuery
+      $.ajax({
+        url: `{{ url('deliveries/search/${receiptNo}') }}`
+        , type: 'GET'
+        , success: function(data) {
+          console.log(data)
+          // Setelah mendapatkan data receipt, tampilkan dalam HTML
+          if (data.status == 'success') {
+            //untuk menampilkan delivery history
+            $('#delivery-history').html('');
+            let history = data.data.deliveries;
+            var history_view = "";
+            history_view += `<div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                              <table class="table table-sm table-striped table-bordered" width=100%>
+                                <thead>
+                                  <tr>
+                                    <th>Delivery</th>
+                                    <th>By</th>
+                                    <th>From/To</th>
+                                    <th>Date</th>
+                                  </tr>
+                                </thead>
+                              <tbody>`;
+            $.each(history, function(index, value) {
+              history_view += `<tr>`;
+              if (value.delivery_type == 'send') {
+                history_view += `<td><span class="badge badge-success">Send</span></td>`;
+              } else {
+                history_view += `<td><span class="badge badge-info">Receive</span></td>`;
+              }
+              history_view += `<td>` + value.user.full_name + `</td>
+                                <td>` + value.delivery_to + `</td>
+                                <td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
+                              </tr>`;
+            });
+            history_view += `</tbody>
+                            </table>
+                          </div>`;
+            $('#delivery-history').append(history_view);
+          } else {
+            alert('Receipt Not Found');
+            $('#transmittal-header').html('');
+            $('#transmittal-detail').html('');
+            $('#delivery-history').html('');
+            $('#transmittal-id').val('');
+          }
+          if (data.data.status == 'delivered') {
+            alert('This receipt has been delivered');
+            $('#delivery-section').html('').hide();
+          }
+        }
+      });
+    }
+  });
+
+</script>
+
+<script>
+  @foreach($tf_to_dept as $transmittal)
+  // if id is-delivered is checked then show span id yes, else show span id no
+  $('#yes{{ $transmittal->receipt_no }}').hide();
+  $('#no{{ $transmittal->receipt_no }}').show();
+  $('#is-delivered{{ $transmittal->receipt_no }}').change(function() {
+    if ($(this).is(':checked')) {
+      $('#yes{{ $transmittal->receipt_no }}').show();
+      $('#no{{ $transmittal->receipt_no }}').hide();
+    } else {
+      $('#yes{{ $transmittal->receipt_no }}').hide();
+      $('#no{{ $transmittal->receipt_no }}').show();
+    }
+  });
+
+  // script untuk menampilkan jam yang sama dengan waktu lokal di komputer pengguna
+  var datetime = document.getElementById("datetime{{ $transmittal->receipt_no }}");
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth() + 1;
+  var day = now.getDate();
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  if (month < 10) {
+    month = "0" + month;
+  }
+  if (day < 10) {
+    day = "0" + day;
+  }
+  if (hour < 10) {
+    hour = "0" + hour;
+  }
+  if (minute < 10) {
+    minute = "0" + minute;
+  }
+  var datetimeValue = year + "-" + month + "-" + day + "T" + hour + ":" + minute;
+  datetime.value = datetimeValue;
+  @endforeach
 
 </script>
 @endsection

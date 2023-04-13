@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use PHPUnit\TextUI\XmlConfiguration\Group;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\DashboardController;
@@ -55,4 +56,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('units', UnitController::class)->except(['show']);
+
+    Route::get('deliveries/send', [DeliveryController::class, 'send'])->name('deliveries.send');
+    Route::get('deliveries/receive', [DeliveryController::class, 'receive'])->name('deliveries.receive');
+    Route::get('deliveries/search/{receiptNo}', [DeliveryController::class, 'search']);
+    Route::post('deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
+    Route::patch('deliveries/{delivery}', [DeliveryController::class, 'update'])->name('deliveries.update');
+    Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy'])->name('deliveries.destroy');
 });

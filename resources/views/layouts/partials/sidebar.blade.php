@@ -22,6 +22,16 @@
           <span>Tracking</span>
         </a>
       </li>
+      <li class="{{ Request::is('deliveries/send*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('deliveries/send') }}"><i class="fas fa-shipping-fast"></i>
+          <span>Send</span>
+        </a>
+      </li>
+      <li class="{{ Request::is('deliveries/receive*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ url('deliveries/receive') }}"><i class="fas fa-file-signature"></i>
+          <span>Receive</span>
+        </a>
+      </li>
       @can('admin')
       <li class="menu-header">Administrator</li>
       <li class="{{ Request::is('units*') ? 'active' : '' }}">

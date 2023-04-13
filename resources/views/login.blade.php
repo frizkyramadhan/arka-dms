@@ -28,8 +28,8 @@
           </div> --}}
 
           <div class="card card-primary">
-            <div class="card-header">
-              <h4>{{ $subtitle }}</h4>
+            <div class="card-header text-center">
+              <h3>{{ $subtitle }}</h3>
             </div>
             <div class="card-body">
               @if (session()->has('status'))
