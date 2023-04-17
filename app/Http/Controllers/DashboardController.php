@@ -29,6 +29,7 @@ class DashboardController extends Controller
         $tf_to_dept = Transmittal::with(['project', 'receiver', 'user', 'transmittal_details'])
             ->whereHas('receiver', function ($query) use ($user) {
                 $query->where('department_id', $user->department_id);
+                $query->where('project_id', $user->project_id);
             })
             ->where('status', 'on delivery')
             ->orderBy('receipt_no', 'desc')

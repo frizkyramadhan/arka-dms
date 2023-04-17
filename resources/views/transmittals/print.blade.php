@@ -1,209 +1,164 @@
-<!doctype html>
-<html lang="en" class="h-100">
+@extends('layouts.main')
 
-<head>
-  <title>{{ $title }} #{{ $transmittal->receipt_full_no }} - ARKA Document Manager</title>
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
-  <style>
-    .bd-placeholder-img {
-      font-size: 1.125rem;
-      text-anchor: middle;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      user-select: none;
-    }
+@section('container')
+<section class="section">
+  <div class="section-header">
+    <h1>{{ $title }}</h1>
+    <div class="section-header-button">
+      <a href="{{ url()->previous() }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
+        Back</a>
+      <button class="btn btn-warning btn-icon icon-left" onclick="printSection()"><i class="fas fa-print"></i> Print</button>
+    </div>
+  </div>
 
-    @media (min-width: 768px) {
-      .bd-placeholder-img-lg {
-        font-size: 12pt;
-      }
-    }
+  <div class="section-body">
+    <div class="invoice">
+      <div class="invoice-print">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="invoice-title">
+              <h2>Transmittal Form</h2>
+              <div class="invoice-number">#{{ $transmittal->receipt_full_no }}</div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-md-6">
+                <address>
+                  <strong>Billed To:</strong><br>
+                  Ujang Maman<br>
+                  1234 Main<br>
+                  Apt. 4B<br>
+                  Bogor Barat, Indonesia
+                </address>
+              </div>
+              <div class="col-md-6 text-md-right">
+                <address>
+                  <strong>Shipped To:</strong><br>
+                  Muhamad Nauval Azhar<br>
+                  1234 Main<br>
+                  Apt. 4B<br>
+                  Bogor Barat, Indonesia
+                </address>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <address>
+                  <strong>Payment Method:</strong><br>
+                  Visa ending **** 4242<br>
+                  ujang@maman.com
+                </address>
+              </div>
+              <div class="col-md-6 text-md-right">
+                <address>
+                  <strong>Order Date:</strong><br>
+                  September 19, 2018<br><br>
+                </address>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  </style>
-
-
-  <!-- Custom styles for this template -->
-  <link href="{{ asset('assets/css/sticky-footer.css') }}" rel="stylesheet">
-</head>
-
-<body class="d-flex flex-column h-100">
-
-  <!-- Begin page content -->
-  <main class="flex-shrink-0">
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <table width="100%" cellspacing="0" class="mb-3">
-            <tr>
-              <td width="450">
-                <table width="100%" cellspacing="0" class="mb-3">
-                  <tr>
-                    <td>
-                      <div class="mb-2"><img src="{{ asset('storage/' . $company->company_logo1) }}"
-                          width="225" height="55" /></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <address>
-                        <h5>{{ $company->company_name }}</h5>
-                        <h6>{{ $company->company_address }}
-                          <br>Phone: {{ $company->company_phone }}
-                        </h6>
-                      </address>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-              <td>
-              </td>
-              <td width="300">
-                <table width="100%" cellspacing="0" class="mb-3">
-                  <tr>
-                    <td colspan="2">
-                      <div class="row">
-                        <div class="col align-self-end">
-                          <table class="mb-2 ml-4" border="1px">
-                            <tr>
-                              <td style="width: 30%">Doc. No</td>
-                              <td style="width: 40%">ARKA/QMR/IV/05.06</td>
-                            </tr>
-                            <tr>
-                              <td>Rev. No</td>
-                              <td>0</td>
-                            </tr>
-                            <tr>
-                              <td>Eff. Date</td>
-                              <td>01 June 2013</td>
-                            </tr>
-                            <tr>
-                              <td>Page</td>
-                              <td>1 of 1</td>
-                            </tr>
-                          </table>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="row">
-                        <div class="col align-self-end">
-                          <table class="mb-2 ml-4" width="100%">
-                            <tr>
-                              <td style="width: 30%">Receipt. No</td>
-                              <td style="width: 40%"><b>{{ $transmittal->receipt_full_no }}</b></td>
-                            </tr>
-                            <tr>
-                              <td>Date</td>
-                              <td><b>{{ date('d-M-Y', strtotime($transmittal->receipt_date)) }}</b></td>
-                            </tr>
-                          </table>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="section-title">Order Summary</div>
+            <p class="section-lead">All items here cannot be deleted.</p>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover table-md">
+                <tr>
+                  <th data-width="40">#</th>
+                  <th>Item</th>
+                  <th class="text-center">Price</th>
+                  <th class="text-center">Quantity</th>
+                  <th class="text-right">Totals</th>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>Mouse Wireless</td>
+                  <td class="text-center">$10.99</td>
+                  <td class="text-center">1</td>
+                  <td class="text-right">$10.99</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Keyboard Wireless</td>
+                  <td class="text-center">$20.00</td>
+                  <td class="text-center">3</td>
+                  <td class="text-right">$60.00</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Headphone Blitz TDR-3000</td>
+                  <td class="text-center">$600.00</td>
+                  <td class="text-center">1</td>
+                  <td class="text-right">$600.00</td>
+                </tr>
+              </table>
+            </div>
+            <div class="row mt-4">
+              <div class="col-lg-8">
+                <div class="section-title">Payment Method</div>
+                <p class="section-lead">The payment method that we provide is to make it easier for you to pay invoices.</p>
+                <div class="images">
+                  <img src="assets/img/visa.png" alt="visa">
+                  <img src="assets/img/jcb.png" alt="jcb">
+                  <img src="assets/img/mastercard.png" alt="mastercard">
+                  <img src="assets/img/paypal.png" alt="paypal">
+                </div>
+              </div>
+              <div class="col-lg-4 text-right">
+                <div class="invoice-detail-item">
+                  <div class="invoice-detail-name">Subtotal</div>
+                  <div class="invoice-detail-value">$670.99</div>
+                </div>
+                <div class="invoice-detail-item">
+                  <div class="invoice-detail-name">Shipping</div>
+                  <div class="invoice-detail-value">$15</div>
+                </div>
+                <hr class="mt-2 mb-2">
+                <div class="invoice-detail-item">
+                  <div class="invoice-detail-name">Total</div>
+                  <div class="invoice-detail-value invoice-detail-value-lg">$685.99</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <table width="100%" cellspacing="0" class="mb-5">
-        <tr>
-          <td>
-            <div class="text-center"><b>
-                <h4><u>TRANSMITTAL FORM</u></h4>
-              </b></div>
-          </td>
-        </tr>
-      </table>
-      <table width="100%" cellpadding="3px" class="mb-3">
-        <tr>
-          <td width="100">To</td>
-          <td width="14">:</td>
-          <td width="826">
-            @if ($transmittal->project_id == null)
-              {{ $transmittal->to }}
-            @else
-              {{ $transmittal->project->project_code }}
-            @endif
-          </td>
-        </tr>
-        <tr>
-          <td>Attn</td>
-          <td width="14">:</td>
-          <td width="826">{{ $transmittal->attn }}</td>
-        </tr>
-      </table>
-      Please acknowledge receipt, by signing and returning original copy of this letter to the
-      undersigned
-
-      <table width="100%" class="table table-bordered mt-3 mb-3 p-5">
-        <tr class="text-center">
-          <th width="20%" style="padding: 15px; border-spacing: 30px">Quantity</th>
-          <th width="50%">Title</th>
-          <th width="30%">Remarks</th>
-        </tr>
-        @foreach ($details as $detail)
-          <tr>
-            <td style="white-space: pre; padding: 10px" class="text-center">{{ $detail->qty }}</td>
-            <td style="white-space: pre; padding: 10px">{{ $detail->title }}</td>
-            <td style="white-space: pre; padding: 10px">{{ $detail->remarks }}</td>
-          </tr>
-        @endforeach
-      </table>
-
-      Very truly yours,
-      <table width="100%" cellspacing="0">
-        <tr>
-          <td width="300">
-            <p>
-              <br>
-              <br>
-              <br>
-              <br>
-              <br>
-              <u>{{ $transmittal->user->full_name }}</u>
-            </p>
-          </td>
-          <td>
-          </td>
-          <td width="300">
-            <table width="100%" style="padding: 15px">
-              <tr>
-                <td width="40%">Received</td>
-                <td width="10%">:</td>
-                <td>...........................................</td>
-              </tr>
-              <tr>
-                <td>Time</td>
-                <td>:</td>
-                <td>...........................................</td>
-              </tr>
-              <tr>
-                <td>Date</td>
-                <td>:</td>
-                <td>...........................................</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+      <hr>
     </div>
-  </main>
-  {{-- <footer class="footer mt-auto py-3 bg-white">
-    <div class="container">
-      <table class="text-muted" width=100%>
-        <tr>
-          <td width=30% class="text-start">ARKA/ITY/IV/02.03</td>
-          <td width=30% class="text-center">Rev. 0</td>
-          <td width=30% class="text-end">Page 1/1</td>
-        </tr>
-      </table>
-    </div>
-  </footer> --}}
-</body>
+    <div class="text-md-right">
 
-</html>
+    </div>
+  </div>
+  </div>
+</section>
+
+@endsection
+
+@section('styles')
+<!-- CSS Libraries -->
+<link rel="stylesheet" href="{{ asset('assets/modules/prism/prism.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/modules/select2/dist/css/select2.min.css') }}">
+@endsection
+@section('scripts')
+<!-- JS Libraies -->
+<script src="{{ asset('assets/modules/prism/prism.js') }}"></script>
+<script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
+
+<script>
+  function printSection() {
+    var body = document.getElementsByClassName("section-body")[0].innerHTML;
+    var printWindow = window.open('', '', 'height=500,width=800');
+    printWindow.document.write('<html><head><title>Print Section</title>');
+    printWindow.document.write(`<link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">`);
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(body);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+  }
+
+</script>
+@endsection

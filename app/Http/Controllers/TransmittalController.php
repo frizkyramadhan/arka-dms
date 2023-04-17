@@ -14,6 +14,7 @@ use App\Mail\TransmittalDelivery;
 use App\Models\TransmittalDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TransmittalController extends Controller
 {
@@ -133,8 +134,10 @@ class TransmittalController extends Controller
         $title = 'Transmittal Form';
         $subtitle = 'Add Transmittal Form';
         $series = 'AR';
+        $year = date('y');
+        $month = date('m');
         $number = Transmittal::max('receipt_no') + 1;
-        $receipt_no = str_pad($number, 5, '0', STR_PAD_LEFT);
+        $receipt_no = $series . $year . $month . str_pad($number, 6, '0', STR_PAD_LEFT);
         $projects = Project::orderBy('project_code', 'asc')->get();
         $departments = Department::where('dept_status', 'active')->orderBy('dept_name', 'asc')->get();
 
@@ -218,7 +221,10 @@ class TransmittalController extends Controller
         $lastReceipt = Transmittal::max('receipt_no');
 
         $newNumber = $lastReceipt + 1;
-        $newReceiptFullNo = 'AR' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        $series = 'AR';
+        $year = date('y');
+        $month = date('m');
+        $newReceiptFullNo = $series . $year . $month . str_pad($newNumber, 6, '0', STR_PAD_LEFT);
 
         return $newReceiptFullNo;
     }
@@ -238,9 +244,10 @@ class TransmittalController extends Controller
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
         $units = Unit::where('unit_status', 1)->orderBy('unit_name', 'asc')->get();
         $transmittal = Transmittal::with(['project', 'user', 'receiver'])->where('id', $id)->first();
+        $qrcode = QrCode::format('svg')->size(200)->generate($transmittal->receipt_full_no); //generate QR code dengan ukuran 300 px dan link untuk tracking
         // dd($transmittal);
 
-        return view('transmittals.show', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'units'));
+        return view('transmittals.show', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'units', 'qrcode'));
     }
 
     /**
@@ -370,139 +377,18 @@ class TransmittalController extends Controller
         return redirect('transmittals/' . $transmittal_id . '/edit')->with('status', 'Record has been deleted successfully!');
     }
 
-    // public function trash()
-    // {
-    //     // show trash
-    //     $title = 'Transmittal Form';
-    //     $subtitle = 'Transmittal Form - Deleted';
-    //     $transmittals = Transmittal::onlyTrashed()->latest()->get();
-
-    //     return view('transmittals.trash', compact('title', 'subtitle', 'transmittals'));
-    // }
-
-    // public function restore($id = null)
-    // {
-    //     // restore transmittal form
-    //     if ($id != null) {
-    //         TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->restore();
-    //         Transmittal::onlyTrashed()->where('id', $id)->restore();
-    //         return redirect('transmittals/trash')->with('status', 'Transmittal Form has been restored!');
-    //     } else {
-    //         TransmittalDetail::onlyTrashed()->restore();
-    //         Transmittal::onlyTrashed()->restore();
-    //         return redirect('transmittals')->with('status', 'Transmittal Form has been restored!');
-    //     }
-    // }
-
-    // public function delete($id = null)
-    // {
-    //     if ($id != null) {
-    //         TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->forceDelete();
-    //         Transmittal::onlyTrashed()->where('id', $id)->forceDelete();
-    //         return redirect('transmittals/trash')->with('status', 'Transmittal Form has been deleted!');
-    //     } else {
-    //         TransmittalDetail::onlyTrashed()->forceDelete();
-    //         Transmittal::onlyTrashed()->forceDelete();
-    //         return redirect('transmittals')->with('status', 'Transmittal Form has been deleted!');
-    //     }
-    // }
-
     public function print($id)
     {
         // show transmittal
         $title = 'Transmittal Form';
         $subtitle = 'Transmittal Form Details';
-        $company = DB::table('companies')->first();
-        $details = TransmittalDetail::where('transmittal_id', $id)->get();
-        $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
-        $transmittal = Transmittal::with(['project', 'user'])->withTrashed()->where('id', $id)->first();
+        $transmittal = Transmittal::with(['deliveries' => function ($query) {
+            $query->orderByDesc('id');
+        }, 'deliveries.user', 'deliveries.unit', 'transmittal_details', 'project', 'department', 'receiver'])->where('id', $id)->first();
+        // dd($transmittal);
+        $qrcode = QrCode::format('svg')->size(300)->generate($transmittal->id); //generate QR code dengan ukuran 300 px dan link untuk tracking
 
-        return view('transmittals.print', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'company'));
-    }
-
-    public function add_delivery(Request $request, $transmittal_id)
-    {
-        // dd($request->receive_button);
-        // check if transmittal_id is exist in delivery table
-        if (Delivery::where('transmittal_id', $transmittal_id)->doesntExist()) {
-            // change transmittal status to delivered
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
-        }
-
-        if ($request->receive_button == 'receive') {
-            // change transmittal status to received
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
-        }
-
-        // add delivery process
-        $data = $request->all();
-        $delivery = new Delivery();
-        $delivery->transmittal_id = $transmittal_id;
-        $delivery->delivery_date = $data['delivery_date'];
-        $delivery->delivery_status = $data['delivery_status'];
-        $delivery->delivery_remarks = $data['delivery_remarks'];
-        $delivery->user_id = auth()->user()->id;
-        $delivery->save();
-
-        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $transmittal_id)->first();
-        $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
-        $cc = [];
-        foreach ($deliveries as $key => $delivery) {
-            $email = [];
-            $email['email'] = $delivery->user->email;
-            $email['name'] = $delivery->user->full_name;
-            $cc[$key] = (object) $email;
-        }
-
-        Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
-            ->cc($cc)
-            ->send(new TransmittalDelivery($transmittals, $deliveries));
-
-        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been added!');
-    }
-
-    public function edit_delivery(Request $request, $transmittal_id, $id)
-    {
-        $this->authorize('update_delivery', [Delivery::class, $id]);
-
-        if ($request->receive_button == 'receive') {
-            // change transmittal status to received
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
-        }
-
-        // edit delivery process
-        Delivery::where('id', $id)->update([
-            'transmittal_id' => $transmittal_id,
-            'delivery_date' => $request->delivery_date,
-            'delivery_status' => $request->delivery_status,
-            'delivery_remarks' => $request->delivery_remarks,
-            'user_id' => auth()->user()->id
-        ]);
-
-        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $transmittal_id)->first();
-        $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();
-        $cc = [];
-        foreach ($deliveries as $key => $delivery) {
-            $email = [];
-            $email['email'] = $delivery->user->email;
-            $email['name'] = $delivery->user->full_name;
-            $cc[$key] = (object) $email;
-        }
-
-        Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
-            ->cc($cc)
-            ->send(new TransmittalDelivery($transmittals, $deliveries));
-
-        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been updated!');
-    }
-
-    public function delete_delivery($transmittal_id, $id)
-    {
-        $this->authorize('delete_delivery', [Delivery::class, $id]);
-        // delete delivery detail
-        Delivery::where('id', $id)->delete();
-
-        return redirect('transmittals/' . $transmittal_id)->with('delivery_status', 'Delivery status has been deleted!');
+        return view('transmittals.print', compact('title', 'subtitle', 'transmittal', 'qrcode'));
     }
 
     public function data()
@@ -565,4 +451,41 @@ class TransmittalController extends Controller
             ->send(new TransmittalDelivery($transmittals, $deliveries));
         return new TransmittalDelivery($transmittals, $deliveries);
     }
+
+    // public function trash()
+    // {
+    //     // show trash
+    //     $title = 'Transmittal Form';
+    //     $subtitle = 'Transmittal Form - Deleted';
+    //     $transmittals = Transmittal::onlyTrashed()->latest()->get();
+
+    //     return view('transmittals.trash', compact('title', 'subtitle', 'transmittals'));
+    // }
+
+    // public function restore($id = null)
+    // {
+    //     // restore transmittal form
+    //     if ($id != null) {
+    //         TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->restore();
+    //         Transmittal::onlyTrashed()->where('id', $id)->restore();
+    //         return redirect('transmittals/trash')->with('status', 'Transmittal Form has been restored!');
+    //     } else {
+    //         TransmittalDetail::onlyTrashed()->restore();
+    //         Transmittal::onlyTrashed()->restore();
+    //         return redirect('transmittals')->with('status', 'Transmittal Form has been restored!');
+    //     }
+    // }
+
+    // public function delete($id = null)
+    // {
+    //     if ($id != null) {
+    //         TransmittalDetail::onlyTrashed()->where('transmittal_id', $id)->forceDelete();
+    //         Transmittal::onlyTrashed()->where('id', $id)->forceDelete();
+    //         return redirect('transmittals/trash')->with('status', 'Transmittal Form has been deleted!');
+    //     } else {
+    //         TransmittalDetail::onlyTrashed()->forceDelete();
+    //         Transmittal::onlyTrashed()->forceDelete();
+    //         return redirect('transmittals')->with('status', 'Transmittal Form has been deleted!');
+    //     }
+    // }
 }

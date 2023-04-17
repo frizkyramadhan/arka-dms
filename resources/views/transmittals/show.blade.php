@@ -5,16 +5,11 @@
   <div class="section-header">
     <h1>{{ $title }}</h1>
     <div class="section-header-button">
-      @if (empty($transmittal->deleted_at))
       <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
         Back</a>
-      <a href="{{ url('trackings?search=' . $transmittal->receipt_full_no) }}" title="Track" class="btn btn-icon icon-left btn-light"><i class="fas fa-search-location"></i> Track</a>
       <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit" class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
-      <a href="{{ url('transmittals/email/' . $transmittal->id) }}" title="Email" class="btn btn-icon icon-left btn-light"><i class="far fa-envelope"></i> Email</a>
-      @else
-      <a href="{{ url('transmittals/trash') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
-        Back</a>
-      @endif
+      {{-- <a href="{{ url('transmittals/email/' . $transmittal->id) }}" title="Email" class="btn btn-icon icon-left btn-light"><i class="far fa-envelope"></i> Email</a> --}}
+      <button class="btn btn-success btn-icon icon-left" onclick="printSection()"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
   <div class="section-body">
@@ -32,9 +27,6 @@
               <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-info">{{ $transmittal->status }}</span></a>
               @endif
             </h4>
-            <div class="card-header-action">
-              <a href="{{ url('transmittals/print/' . $transmittal->id) }}" class="btn btn-primary"><i class="fas fa-print"></i> Print</a>
-            </div>
           </div>
           <div class="card-body">
             @if (session('transmittal_status'))
@@ -61,7 +53,7 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                       <address style="font-size: 12pt">
                         <strong>Receipt No:</strong><br>
                         # {{ $transmittal->receipt_full_no }}
@@ -75,7 +67,7 @@
                         {{ $transmittal->user->full_name }}
                       </address>
                     </div>
-                    <div class="col-md-6 text-md-right">
+                    <div class="col-md-4 text-md-right">
                       <address style="font-size: 12pt">
                         <strong>To:</strong><br>
                         @if (empty($transmittal->project_id))
@@ -100,10 +92,11 @@
                         {{ $transmittal->attn }}
                         @endif
                       </address>
-                      {{-- <address style="font-size: 12pt">
-                          <strong>Received Date:</strong><br>
-                          {{ $transmittal->received_date != null ? date('d-M-Y', strtotime($transmittal->received_date)) : '' }}
-                      </address> --}}
+                    </div>
+                    <div class="col-md-4 text-center">
+                      {{ $qrcode }}
+                      <br />
+                      {{ $transmittal->receipt_full_no }}
                     </div>
                   </div>
                 </div>
@@ -111,13 +104,13 @@
 
               <div class="row mt-0">
                 <div class="col-md-12">
-                  <div class="section-title">{{ $subtitle }}</div>
+                  <div class="section-title"><strong>{{ $subtitle }}</strong></div>
                   <div class="table-responsive">
                     <table class="table table-striped table-bordered">
                       <tr>
-                        <th style="width:55%">Description</th>
-                        <th style="width:12%" class="text-center">Qty</th>
-                        <th style="width:12%" class="text-center">UoM</th>
+                        <th style="width:40%">Description</th>
+                        <th style="width:10%" class="text-center">Qty</th>
+                        <th style="width:10%" class="text-center">UoM</th>
                         <th>Remarks</th>
                       </tr>
                       @foreach ($details as $detail)
@@ -482,6 +475,32 @@
     };
   });
   @endforeach
+
+</script>
+
+<script>
+  function printSection() {
+    var body = document.getElementsByClassName("invoice-print")[0].innerHTML;
+    var printWindow = window.open('', '', 'height=500,width=800');
+    printWindow.document.write('<html><head><title>Print Section</title>');
+
+    // Load CSS file using AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}", true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        printWindow.document.write('<style type="text/css">' + xhr.responseText + '</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<div class="card card-primary"><div class="card-header">Transmittal Form</div>');
+        printWindow.document.write('<div class="card-body p-4">');
+        printWindow.document.write(body);
+        printWindow.document.write('</div></div></body></html>');
+        printWindow.document.close();
+        printWindow.print();
+      }
+    };
+    xhr.send();
+  }
 
 </script>
 

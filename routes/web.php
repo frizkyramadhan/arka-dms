@@ -41,9 +41,6 @@ Route::middleware('auth')->group(function () {
     Route::get('transmittals/delete/{id?}', [TransmittalController::class, 'delete'])->name('transmittals.delete');
     Route::get('transmittals/print/{id?}', [TransmittalController::class, 'print']);
     Route::get('transmittals/email/{id?}', [TransmittalController::class, 'email']);
-    Route::post('transmittals/delivery/{id?}', [TransmittalController::class, 'add_delivery']);
-    Route::put('transmittals/{transmittal_id?}/delivery/{id?}', [TransmittalController::class, 'edit_delivery']);
-    Route::get('transmittals/{transmittal_id?}/delivery/delete/{id?}', [TransmittalController::class, 'delete_delivery']);
     Route::get('transmittals/getReceiver', [TransmittalController::class, 'getReceiver'])->name('transmittals.getReceiver');
     Route::resource('transmittals', TransmittalController::class);
 
