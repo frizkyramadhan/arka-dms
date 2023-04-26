@@ -32,7 +32,7 @@
           <span>Receive</span>
         </a>
       </li>
-      @can('admin')
+      @can('administrator')
       <li class="menu-header">Administrator</li>
       <li class="{{ Request::is('units*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('units') }}"><i class="fas fa-truck"></i>

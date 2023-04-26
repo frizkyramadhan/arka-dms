@@ -107,19 +107,25 @@
               if (value.delivery_type == 'send') {
                 history_view += `<div class="activity-icon bg-success text-white">
                                   <i class="fas fa-shipping-fast"></i>
+                                </div>
+                                <div class="activity-detail">
+                                <div class="mb-2">
+                                  <span class="bullet"></span>
+                                  <span class="text-job">` + value.delivery_type + ` to ` + value.receiver.full_name + `</span>
+                                  <span class="bullet"></span>
                                 </div>`;
               } else if (value.delivery_type == 'receive') {
                 history_view += `<div class="activity-icon bg-info text-white">
                                   <i class="fas fa-file-signature"></i>
-                                </div>`;
-              }
-              history_view += `<div class="activity-detail">
+                                </div>
+                                <div class="activity-detail">
                                 <div class="mb-2">
                                   <span class="bullet"></span>
                                   <span class="text-job">` + value.delivery_type + ` by ` + value.user.full_name + `</span>
                                   <span class="bullet"></span>
-                                </div>
-                                <p style="white-space: pre">` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</p>
+                                </div>`;
+              }
+              history_view += `<p style="white-space: pre">` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</p>
                                 <p style="white-space: pre">` + value.delivery_remarks + `</p>`;
               if (value.image != null) {
                 history_view += `<p style="white-space: pre"><a href="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" data-toggle="modal" data-target="#image-${value.id}">` + value.image + `</a></p>`;

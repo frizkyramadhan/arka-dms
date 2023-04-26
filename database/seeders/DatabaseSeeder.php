@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminUserSeeder::class);
         $this->call(UnitSeeder::class);
 
-        User::factory(10)->create();
+        User::factory(50)->create();
         // Transmittal::factory(500)->create();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Project;
+use App\Models\Delivery;
 use App\Models\Department;
 use App\Models\Transmittal;
 use Laravel\Sanctum\HasApiTokens;
@@ -26,7 +27,7 @@ class User extends Authenticatable
         'password',
         'project_id',
         'department_id',
-        'level'
+        'role'
     ];
 
     /**
@@ -61,5 +62,10 @@ class User extends Authenticatable
     public function transmittal()
     {
         return $this->hasMany(Transmittal::class);
+    }
+
+    public function delivery()
+    {
+        return $this->hasMany(Delivery::class, 'user_id');
     }
 }

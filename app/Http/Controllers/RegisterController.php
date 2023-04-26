@@ -27,7 +27,7 @@ class RegisterController extends Controller
             'password' => 'required|min:5',
             'project_id' => 'required',
             'department_id' => 'required',
-            'level' => 'required'
+            'role' => 'required'
         ], [
             'full_name.required' => 'Full Name is required',
             'email.required' => 'Email is required',

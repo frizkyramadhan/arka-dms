@@ -16,7 +16,7 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!auth()->check() || auth()->user()->level != 'administrator') {
+        if (!auth()->check() || auth()->user()->role != 'administrator') {
             return response()->view('errors.403');
         }
         return $next($request);

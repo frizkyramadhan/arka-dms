@@ -86,10 +86,10 @@
               <div class="form-group row mb-4">
                 <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Role</label>
                 <div class="col-sm-12 col-md-7">
-                  <select class="form-control" name="level">
-                    <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
-                    <option value="superuser" {{ $user->level == 'superuser' ? 'selected' : '' }}>Super User</option>
-                    <option value="administrator" {{ $user->level == 'administrator' ? 'selected' : '' }}>
+                  <select class="form-control" name="role">
+                    <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
+                    <option value="gateway" {{ $user->role == 'gateway' ? 'selected' : '' }}>Gateway</option>
+                    <option value="administrator" {{ $user->role == 'administrator' ? 'selected' : '' }}>
                       Administrator</option>
                   </select>
                 </div>

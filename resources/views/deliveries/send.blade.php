@@ -78,7 +78,13 @@
                   </div>
                   <div class="form-group">
                     <label>Sent To</label>
-                    <input type="text" class="form-control" name="delivery_to" value="{{ old('delivery_to') }}" required>
+                    <select class="custom-select" name="deliver_to" id="deliver-to">
+                      <option value="">-- Select Receiver --</option>
+                      @foreach ($receivers as $receiver)
+                      <option value="{{ $receiver->id }}" {{ old('deliver_to') == $receiver->id ? 'selected' : null }}>
+                        {{ $receiver->full_name }} {{ $receiver->role == 'gateway' ? '[GATEWAY]' : '' }}</option>
+                      @endforeach
+                    </select>
                   </div>
                   <div class="form-group">
                     <label>Remarks</label>
@@ -90,27 +96,48 @@
                   </div>
                 </div>
                 <div class="col-md-6 mb-2">
-                  <div class="form-group">
-                    <label>Unit Type <small class="text-danger">*optional</small></label>
-                    <select class="custom-select select2" name="unit_id" id="unit_id">
-                      <option value="">-- Select Unit --</option>
-                      @foreach ($units as $item)
-                      <option value="{{ $item->id }}" {{ old('unit_id') == $item->id ? 'selected' : null }}>
-                        {{ $item->unit_name }}</option>
-                      @endforeach
-                    </select>
+                  <div id="gateway-section">
+                    <div class="form-group">
+                      <label>Courier <small class="text-danger">*optional</small></label>
+                      <select class="custom-select" name="courier_id" id="courier_id">
+                        <option value="">-- Select Courier --</option>
+                        @foreach ($couriers as $courier)
+                        <option value="{{ $courier->id }}" {{ old('courier_id') == $courier->id ? 'selected' : null }}>
+                          {{ $courier->full_name }} {{ $receiver->role == 'courier' ? '[COURIER]' : '' }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Unit Type <small class="text-danger">*optional</small></label>
+                      <select class="custom-select" name="unit_id" id="unit_id">
+                        <option value="">-- Select Unit --</option>
+                        @foreach ($units as $item)
+                        <option value="{{ $item->id }}" {{ old('unit_id') == $item->id ? 'selected' : null }}>
+                          {{ $item->unit_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
+                      <input type="text" class="form-control" name="nopol" value="{{ old('nopol') }}">
+                    </div>
+                    <div class="form-group">
+                      <label>PO No. <small class="text-danger">*optional</small></label>
+                      <input type="text" class="form-control" name="po_no" value="{{ old('po_no') }}">
+                    </div>
+                    <div class="form-group">
+                      <label>DO. No. <small class="text-danger">*optional</small></label>
+                      <input type="text" class="form-control" name="do_no" value="{{ old('do_no') }}">
+                    </div>
                   </div>
                   <div class="form-group">
-                    <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
-                    <input type="text" class="form-control" name="nopol" value="{{ old('nopol') }}">
-                  </div>
-                  <div class="form-group">
-                    <label>PO No. <small class="text-danger">*optional</small></label>
-                    <input type="text" class="form-control" name="po_no" value="{{ old('po_no') }}">
-                  </div>
-                  <div class="form-group">
-                    <label>DO. No. <small class="text-danger">*optional</small></label>
-                    <input type="text" class="form-control" name="do_no" value="{{ old('do_no') }}">
+                    <div class="control-label">Complete This Delivery?</div>
+                    <label class="custom-switch mt-2">
+                      <input id="is-delivered" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
+                      <span class="custom-switch-indicator"></span>
+                      <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                      <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -289,17 +316,18 @@
                                           <tr>
                                             <th>Delivery</th>
                                             <th>By</th>
-                                            <th>To/From</th>
                                             <th>Date</th>
                                           </tr>
                                         </thead>
                                       <tbody>`;
             $.each(history, function(index, value) {
-              history_view += `<tr>
-                                <td>` + value.delivery_type + `</td>
-                                <td>` + value.user.full_name + `</td>
-                                <td>` + value.delivery_to + `</td>
-                                <td>` + moment(value.delivery_date).format('DD MMMM YYYY hh:mm A') + `</td>
+              history_view += `<tr>`;
+              if (value.delivery_type == 'send') {
+                history_view += `<td><span class="badge badge-success">Send</span></td><td>` + value.receiver.full_name + `</td>`;
+              } else {
+                history_view += `<td><span class="badge badge-info">Receive</span></td><td>` + value.user.full_name + `</td>`;
+              }
+              history_view += `<td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
                               </tr>`;
             });
             history_view += `</tbody>
@@ -326,9 +354,6 @@
     }
   });
 
-</script>
-
-<script>
   function validateSize() {
     const file = document.getElementById('image').files[0];
     const size = file.size;
@@ -339,6 +364,45 @@
       document.getElementById('image').value = null;
     }
   }
+
+  // if id is-delivered is checked then show span id yes, else show span id no
+  $('#yes').hide();
+  $('#no').show();
+  $('#is-delivered').change(function() {
+    if ($(this).is(':checked')) {
+      var confirmMsg = confirm("Klik OK jika pengiriman sudah sampai di tujuan akhir!");
+      if (confirmMsg == true) {
+        $('#yes').show();
+        $('#no').hide();
+      } else {
+        $(this).prop('checked', false);
+      }
+    } else {
+      $('#yes').hide();
+      $('#no').show();
+    }
+  });
+
+  $('#gateway-section').hide();
+  // if your role = gateway and id deliver-to is selected to user which role = gateway from ajax request then show gateway-section
+  $('#deliver-to').change(function() {
+    const deliver_to = $('#deliver-to').val();
+    $.ajax({
+      url: `{{ url('deliveries/getRole/${deliver_to}') }}`
+      , type: "GET"
+      , dataType: "JSON"
+      , success: function(data) {
+        console.log(data);
+        if (data.data.role == 'gateway') {
+          $('#gateway-section').show();
+          $('#gateway-section input, #gateway-section select').prop('disabled', false);
+        } else {
+          $('#gateway-section').hide();
+          $('#gateway-section input, #gateway-section select').prop('disabled', true);
+        }
+      }
+    });
+  });
 
 </script>
 

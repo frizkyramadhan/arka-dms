@@ -9,7 +9,7 @@ class UnitController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('admin');
+        $this->middleware('administrator');
     }
 
     public function index()

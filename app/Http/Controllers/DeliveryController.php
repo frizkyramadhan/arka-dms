@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Unit;
+use App\Models\User;
 use App\Models\Delivery;
 use App\Models\Transmittal;
 use Illuminate\Http\Request;
@@ -42,8 +43,9 @@ class DeliveryController extends Controller
         $delivery->transmittal_id = $transmittal_id;
         $delivery->delivery_type = $data['delivery_type'];
         $delivery->delivery_date = $data['delivery_date'];
-        $delivery->delivery_to = $data['delivery_to'];
         $delivery->user_id = auth()->user()->id;
+        $delivery->deliver_to = $data['deliver_to'] ?? null;
+        $delivery->courier_id = $data['courier_id'] ?? null;
         $delivery->unit_id = $data['unit_id'] ?? null;
         $delivery->nopol = $data['nopol'] ?? null;
         $delivery->po_no = $data['po_no'] ?? null;
@@ -109,8 +111,9 @@ class DeliveryController extends Controller
         $delivery->transmittal_id = $transmittal_id;
         $delivery->delivery_type = $data['delivery_type'];
         $delivery->delivery_date = $data['delivery_date'];
-        $delivery->delivery_to = $data['delivery_to'];
         $delivery->user_id = auth()->user()->id;
+        $delivery->deliver_to = $data['deliver_to'] ?? null;
+        $delivery->courier_id = $data['courier_id'] ?? null;
         $delivery->unit_id = $data['unit_id'] ?? null;
         $delivery->nopol = $data['nopol'] ?? null;
         $delivery->po_no = $data['po_no'] ?? null;
@@ -179,12 +182,18 @@ class DeliveryController extends Controller
             $delivery->delete();
         }
 
-        // if delivery is the last one, delete delivery and change transmittal status to 'published'
         $transmittal_id = $delivery->transmittal_id;
+        // if delivery is the last one, delete delivery and change transmittal status to 'published'
         $deliveries = Delivery::where('transmittal_id', $transmittal_id)->get();
         if (count($deliveries) == 0) {
             Transmittal::where('id', $transmittal_id)->update(['status' => 'published']);
         }
+        // if delivery with is_delivered = 'yes' is deleted then change transmittal status to 'on delivery'
+        $is_delivered = Delivery::where('transmittal_id', $transmittal_id)->where('is_delivered', 'yes')->get();
+        if (count($is_delivered) == 0) {
+            Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
+        }
+
 
         return redirect()->back()->with('delivery_status', 'Delivery status has been deleted! <strong>Click on status above to see the details.</strong>');
     }
@@ -195,7 +204,36 @@ class DeliveryController extends Controller
         $subtitle = 'Send Transmittal';
         $units = Unit::where('unit_status', 1)->orderBy('unit_name', 'asc')->get();
 
-        return view('deliveries.send', compact('title', 'subtitle', 'units'));
+        // make "receivers" variable from User model which has all user at same project as user login or has role "gateway" at the same project
+        $user = auth()->user(); // Mendapatkan user yang sedang login
+        $project_id = $user->project_id; // Mendapatkan ID project dari user yang sedang login
+
+        if ($user->role == 'gateway') {
+            $receivers = User::where('project_id', $project_id)
+                ->orWhere(function ($query) {
+                    $query->where('role', 'gateway');
+                })
+                ->get();
+            $couriers = User::where('project_id', $project_id)
+                ->where(function ($query) {
+                    $query->where('role', 'courier');
+                })
+                ->get();
+        } else {
+            $receivers = User::where('project_id', $project_id)
+                ->orWhere(function ($query) use ($project_id) {
+                    $query->where('role', 'gateway')
+                        ->where('project_id', $project_id);
+                })
+                ->get();
+            $couriers = User::where('project_id', $project_id)
+                ->where(function ($query) {
+                    $query->where('role', 'courier');
+                })
+                ->get();
+        }
+
+        return view('deliveries.send', compact('title', 'subtitle', 'units', 'receivers', 'couriers'));
     }
 
     public function receive()
@@ -211,7 +249,7 @@ class DeliveryController extends Controller
     {
         $transmittal = Transmittal::with(['deliveries' => function ($query) {
             $query->orderByDesc('id');
-        }, 'deliveries.user', 'deliveries.unit', 'transmittal_details', 'project', 'department', 'receiver'])->where('receipt_full_no', $receiptNo)->first();
+        }, 'deliveries.user', 'deliveries.unit', 'deliveries.receiver', 'transmittal_details', 'project', 'department', 'receiver'])->where('receipt_full_no', $receiptNo)->first();
 
         if ($transmittal) {
             return response()->json([
@@ -222,6 +260,34 @@ class DeliveryController extends Controller
             return response()->json([
                 'status' => 'error',
                 'data' => 'No data found'
+            ]);
+        }
+    }
+
+    public function getRole($id)
+    {
+        $user = auth()->user();
+        $gateways = User::where('id', $id)->first();
+
+        if ($user->role == 'gateway' && $gateways->role == 'gateway') {
+            return response()->json([
+                'status' => 'success',
+                'data' => $gateways
+            ]);
+        } else if ($user->role == 'gateway' && $gateways->role != 'gateway') {
+            return response()->json([
+                'status' => 'error',
+                'data' => 'You are a gateway but you are trying to send transmittal to a non-gateway user'
+            ]);
+        } else if ($user->role != 'gateway' && $gateways->role == 'gateway') {
+            return response()->json([
+                'status' => 'error',
+                'data' => 'You are a not gateway but you are trying to send transmittal to a gateway user'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'data' => 'You are a not gateway and you are trying to send transmittal to a non-gateway user'
             ]);
         }
     }

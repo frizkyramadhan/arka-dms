@@ -1902,8 +1902,7 @@ tr:first-child>td>.fc-day-grid-event {
   top: 0;
   width: 1px;
   height: 100%;
-  /* background-color: #6777ef; */
-  background-color: lightslategray;
+  background-color: slategray;
 }
 
 .activities .activity:last-child:before {

@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('deliveries/send', [DeliveryController::class, 'send'])->name('deliveries.send');
     Route::get('deliveries/receive', [DeliveryController::class, 'receive'])->name('deliveries.receive');
     Route::get('deliveries/search/{receiptNo}', [DeliveryController::class, 'search']);
+    Route::get('deliveries/getRole/{id}', [DeliveryController::class, 'getRole']);
     Route::post('deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
     Route::patch('deliveries/{delivery}', [DeliveryController::class, 'update'])->name('deliveries.update');
     Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy'])->name('deliveries.destroy');

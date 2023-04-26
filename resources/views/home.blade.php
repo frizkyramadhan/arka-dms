@@ -262,6 +262,9 @@
     </div>
   </div>
 </section>
+<div id=image-modal>
+
+</div>
 @foreach ($tf_to_dept as $transmittal)
 <div class="modal fade" tabindex="-1" role="dialog" id="transmittalModal-{{ $transmittal->receipt_no }}">
   <div class="modal-dialog modal-lg" role="document">
@@ -280,7 +283,7 @@
                 <div class="col-md-6">
                   <address style="font-size: 12pt">
                     <strong>Receipt No:</strong><br>
-                    # {{ $transmittal->receipt_full_no }}
+                    # {{$transmittal->receipt_full_no}}
                   </address>
                   <address style="font-size: 12pt">
                     <strong>Date:</strong><br>
@@ -308,21 +311,21 @@
                     {{ $transmittal->attn }}
                     @endif
                   </address>
-                  <address style="font-size: 12pt">
-                    <strong>Received by:</strong><br>
-                    @if (empty($transmittal->attn))
-                    {{ $transmittal->receiver->full_name }}
-                    @else
-                    {{ $transmittal->attn }}
-                    @endif
-                  </address>
+                  {{-- <address style="font-size: 12pt">
+                    <strong>Last Received by:</strong><br>
+                    @foreach($transmittal->deliveries as $delivery)
+                    {{ $delivery->user->full_name }} ({{ date('d-M-Y', strtotime($delivery->delivery_date)) }})
+                  @endforeach
+                  </address> --}}
                 </div>
               </div>
             </div>
           </div>
           <div class="row mt-0">
             <div class="col-md-12">
-              <div class="section-title text-center"><strong>Transmittal Detail</strong></div>
+              <div class="section-title text-center">
+                <h6><strong>- Transmittal Detail -</strong></h6>
+              </div>
               <div class="table-responsive">
                 <table class="table table-sm table-striped table-bordered">
                   <tr>
@@ -337,6 +340,38 @@
                     <td style="white-space: pre" class="text-center">{{ $detail->qty }}</td>
                     <td style="white-space: pre" class="text-center">{{ $detail->uom }}</td>
                     <td style="white-space: pre">{{ $detail->remarks }}</td>
+                  </tr>
+                  @endforeach
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-0">
+            <div class="col-md-12">
+              <div class="section-title text-center">
+                <h6><strong>- Delivery History -</strong></h6>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered">
+                  <tr>
+                    <th>Delivery</th>
+                    <th>By</th>
+                    <th>Date</th>
+                    <th>Remarks</th>
+                  </tr>
+                  {{-- @dd($transmittal->deliveries) --}}
+                  @foreach ($transmittal->deliveries as $delivery)
+                  <tr>
+                    <td>
+                      @if ($delivery->delivery_type == 'send')
+                      <span class="badge badge-success">Send</span>
+                      @else
+                      <span class="badge badge-info">Receive</span>
+                      @endif
+                    </td>
+                    <td style="white-space: pre">{{ $delivery->delivery_type == 'send' ? $delivery->receiver->full_name : $delivery->user->full_name }}</td>
+                    <td style="white-space: pre">{{ date('d-m-Y H:i', strtotime($delivery->delivery_date)) }}</td>
+                    <td style="white-space: pre">{{ $delivery->delivery_remarks }}</td>
                   </tr>
                   @endforeach
                 </table>
@@ -380,40 +415,40 @@
                       <label>Date</label>
                       <input type="datetime-local" id="datetime{{ $transmittal->receipt_no }}" name="delivery_date" class="form-control" value="{{ old('delivery_date') }}" required>
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                       <label>Receive From</label>
                       <input type="text" class="form-control" name="delivery_to" value="{{ old('delivery_to') }}" required>
-                    </div>
-                    <div class="form-group">
-                      <label>Remarks</label>
-                      <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="6">{{ old('delivery_remarks') }}</textarea>
-                    </div>
-                    <div class="form-group">
-                      <label>Image <small class="text-danger">*optional</small></label>
-                      <input type="file" class="form-control" name="image">
-                    </div>
-                    <div class="form-group">
-                      <div class="control-label">Complete This Delivery?</div>
-                      <label class="custom-switch mt-2">
-                        <input id="is-delivered{{ $transmittal->receipt_no }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
-                        <span class="custom-switch-indicator"></span>
-                        <span id="yes{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                        <span id="no{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                      </label>
-                    </div>
+                  </div> --}}
+                  <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="6">{{ old('delivery_remarks') }}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Image <small class="text-danger">*optional</small></label>
+                    <input type="file" class="form-control" name="image">
+                  </div>
+                  <div class="form-group">
+                    <div class="control-label">Complete This Delivery?</div>
+                    <label class="custom-switch mt-2">
+                      <input id="is-delivered{{ $transmittal->receipt_no }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
+                      <span class="custom-switch-indicator"></span>
+                      <span id="yes{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                      <span id="no{{ $transmittal->receipt_no }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                    </label>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="modal-footer bg-whitesmoke br">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-info">Save</button>
-        </div>
-      </form>
     </div>
+    <div class="modal-footer bg-whitesmoke br">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <button type="submit" class="btn btn-info">Save</button>
+    </div>
+    </form>
   </div>
+</div>
 </div>
 @endforeach
 @endsection
@@ -582,6 +617,7 @@
             //untuk menampilkan delivery history
             $('#delivery-history').html('');
             let history = data.data.deliveries;
+            var image_view = "";
             var history_view = "";
             history_view += `<div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
                               <table class="table table-sm table-striped table-bordered" width=100%>
@@ -589,33 +625,60 @@
                                   <tr>
                                     <th>Delivery</th>
                                     <th>By</th>
-                                    <th>From/To</th>
                                     <th>Date</th>
+                                    <th>Remarks</th>
                                   </tr>
                                 </thead>
                               <tbody>`;
             $.each(history, function(index, value) {
               history_view += `<tr>`;
               if (value.delivery_type == 'send') {
-                history_view += `<td><span class="badge badge-success">Send</span></td>`;
+                history_view += `<td><a href="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" data-toggle="modal" data-target="#image-` + value.id + `"><span class="badge badge-success">Send</span></a></td>
+                                 <td>` + value.receiver.full_name + `</td>`;
               } else {
-                history_view += `<td><span class="badge badge-info">Receive</span></td>`;
+                history_view += `<td><a href="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" data-toggle="modal" data-target="#image-` + value.id + `"><span class="badge badge-info">Receive</span></a></td>
+                                 <td>` + value.user.full_name + `</td>`;
               }
-              history_view += `<td>` + value.user.full_name + `</td>
-                                <td>` + value.delivery_to + `</td>
-                                <td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
+              history_view += `<td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
+                               <td>` + value.delivery_remarks + `</td>
                               </tr>`;
+
+              //untuk menampilkan image modal
+              image_view += `<div class="modal fade" tabindex="-1" role="dialog" id="image-` + value.id + `">
+                              <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-body">`;
+              if (value.image != null) {
+                image_view += `<figure>
+                                <img src="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" class="img-fluid" alt="image">
+                                <figcaption class="text-center">` + value.image + `</figcaption>
+                              </figure>`
+              } else {
+                image_view += `<p class="text-center">No image available</p>`
+              }
+              image_view += `</div>
+                            <div class="modal-footer bg-whitesmoke br">
+                              <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>`;
+
             });
             history_view += `</tbody>
                             </table>
                           </div>`;
+
             $('#delivery-history').append(history_view);
+            $('#image-modal').append(image_view);
           } else {
             alert('Receipt Not Found');
             $('#transmittal-header').html('');
             $('#transmittal-detail').html('');
             $('#delivery-history').html('');
             $('#transmittal-id').val('');
+            var history_view = "";
+            var image_view = "";
           }
           if (data.data.status == 'delivered') {
             alert('This receipt has been delivered');
@@ -635,8 +698,13 @@
   $('#no{{ $transmittal->receipt_no }}').show();
   $('#is-delivered{{ $transmittal->receipt_no }}').change(function() {
     if ($(this).is(':checked')) {
-      $('#yes{{ $transmittal->receipt_no }}').show();
-      $('#no{{ $transmittal->receipt_no }}').hide();
+      var confirmMsg = confirm("Klik OK jika pengiriman sudah sampai di tujuan akhir!");
+      if (confirmMsg == true) {
+        $('#yes{{ $transmittal->receipt_no }}').show();
+        $('#no{{ $transmittal->receipt_no }}').hide();
+      } else {
+        $(this).prop('checked', false);
+      }
     } else {
       $('#yes{{ $transmittal->receipt_no }}').hide();
       $('#no{{ $transmittal->receipt_no }}').show();
@@ -668,4 +736,5 @@
   @endforeach
 
 </script>
+
 @endsection

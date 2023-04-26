@@ -56,7 +56,10 @@
                     <div class="col-md-4">
                       <address style="font-size: 12pt">
                         <strong>Receipt No:</strong><br>
-                        # {{ $transmittal->receipt_full_no }}
+                        # <span id="receipt-no-{{ $transmittal->id }}">{{ $transmittal->receipt_full_no }}</span>
+                        <a href="#" class="copy-button" data-target="receipt-no-{{ $transmittal->id }}">
+                          <i class="far fa-copy"></i>
+                        </a>
                       </address>
                       <address style="font-size: 12pt">
                         <strong>Date:</strong><br>
@@ -85,12 +88,8 @@
                         @endif
                       </address>
                       <address style="font-size: 12pt">
-                        <strong>Received by:</strong><br>
-                        @if (empty($transmittal->attn))
-                        {{ $transmittal->receiver->full_name }}
-                        @else
-                        {{ $transmittal->attn }}
-                        @endif
+                        <strong>Last Received by:</strong><br>
+                        {{ $received_by->user->full_name ?? null}} {{ $received_by ? date('d-M-Y', strtotime($received_by->delivery_date)) : null }}
                       </address>
                     </div>
                     <div class="col-md-4 text-center">
@@ -151,7 +150,6 @@
                 <th scope="col">No</th>
                 <th scope="col">Delivery</th>
                 <th scope="col">By</th>
-                <th scope="col">From/To</th>
                 <th scope="col">Date</th>
                 <th scope="col">Remarks</th>
                 <th scope="col" class="text-center">Action</th>
@@ -168,13 +166,18 @@
                 <th scope="row">{{ $loop->iteration }}</th>
                 <td>
                   @if ($delivery->delivery_type == 'send')
-                  <a href="#" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}" title="Click to see the Modal"><span class="badge badge-success">Send</span></a>
+                  <a href="#" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}" title="Click to see the image"><span class="badge badge-success">Send</span></a>
                   @else
                   <a href="#" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}" title="Click to see the image"><span class="badge badge-info">Receive</span></a>
                   @endif
                 </td>
-                <td>{{ $delivery->user->full_name }}</td>
-                <td>{{ $delivery->delivery_to }}</td>
+                <td>
+                  @if ($delivery->delivery_type == 'send')
+                  {{ $delivery->receiver->full_name }}
+                  @else
+                  {{ $delivery->user->full_name }}
+                  @endif
+                </td>
                 <td>{{ date('d-m-Y H:m', strtotime($delivery->delivery_date)) }}</td>
                 <td>{{ $delivery->delivery_remarks }}</td>
                 <td class="text-center">
@@ -227,7 +230,7 @@
                     <input type="hidden" id="transmittal-id" name="transmittal_id" class="form-control" value="{{ $delivery->transmittal_id }}">
                     <div class="form-group">
                       <label>Send By</label>
-                      <input type="text" class="form-control" value="{{ $delivery->user->full_name }}" readonly>
+                      <input type="text" class="form-control" value="{{ $delivery->user->full_name }} {{ $delivery->user->role == 'gateway' ? '[GATEWAY]' : '' }}" readonly>
                     </div>
                     <div class="form-group">
                       <label>Date</label>
@@ -235,7 +238,12 @@
                     </div>
                     <div class="form-group">
                       <label>Send To</label>
-                      <input type="text" class="form-control" name="delivery_to" value="{{ $delivery->delivery_to }}" required>
+                      <select name="deliver_to" id="deliver-to-{{ $delivery->id }}" class="form-control" required>
+                        <option value="">-- Select Receiver --</option>
+                        @foreach ($receivers as $receiver)
+                        <option value="{{ $receiver->id }}" {{ $delivery->deliver_to == $receiver->id ? 'selected' : '' }}>{{ $receiver->full_name }} {{ $receiver->role == 'gateway' ? '[GATEWAY]' : '' }}</option>
+                        @endforeach
+                      </select>
                     </div>
                     <div class="form-group">
                       <label>Remarks</label>
@@ -253,27 +261,39 @@
                         <input type="file" class="form-control" name="image" id="image-{{ $delivery->id }}" accept=".jpeg, .png, .jpg, .gif, .svg">
                       </div>
                     </div>
-                    <div class="form-group">
-                      <label>Unit Type <small class="text-danger">*optional</small></label>
-                      <select class="custom-select select2" name="unit_id" id="unit_id">
-                        <option value="">-- Select Unit --</option>
-                        @foreach ($units as $item)
-                        <option value="{{ $item->id }}" {{ old('unit_id', $delivery->unit_id) == $item->id ? 'selected' : null }}>
-                          {{ $item->unit_name }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
-                      <input type="text" class="form-control" name="nopol" value="{{ $delivery->nopol }}">
-                    </div>
-                    <div class="form-group">
-                      <label>PO No. <small class="text-danger">*optional</small></label>
-                      <input type="text" class="form-control" name="po_no" value="{{ $delivery->po_no }}">
-                    </div>
-                    <div class="form-group">
-                      <label>DO. No. <small class="text-danger">*optional</small></label>
-                      <input type="text" class="form-control" name="do_no" value="{{ $delivery->do_no }}">
+                    <div id="gateway-section-{{ $delivery->id }}">
+                      <div class="form-group">
+                        <label>Courier <small class="text-danger">*optional</small></label>
+                        <select class="custom-select" name="courier_id" id="courier-id-{{ $delivery->id }}">
+                          <option value="">-- Select Courier --</option>
+                          @foreach ($couriers as $courier)
+                          <option value="{{ $courier->id }}" {{ old('courier_id', $delivery->courier_id) == $courier->id ? 'selected' : null }}>
+                            {{ $courier->full_name }} {{ $receiver->role == 'courier' ? '[COURIER]' : '' }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Unit Type <small class="text-danger">*optional</small></label>
+                        <select class="custom-select select2" name="unit_id" id="unit_id">
+                          <option value="">-- Select Unit --</option>
+                          @foreach ($units as $item)
+                          <option value="{{ $item->id }}" {{ old('unit_id', $delivery->unit_id) == $item->id ? 'selected' : null }}>
+                            {{ $item->unit_name }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
+                        <input type="text" class="form-control" name="nopol" value="{{ $delivery->nopol }}">
+                      </div>
+                      <div class="form-group">
+                        <label>PO No. <small class="text-danger">*optional</small></label>
+                        <input type="text" class="form-control" name="po_no" value="{{ $delivery->po_no }}">
+                      </div>
+                      <div class="form-group">
+                        <label>DO. No. <small class="text-danger">*optional</small></label>
+                        <input type="text" class="form-control" name="do_no" value="{{ $delivery->do_no }}">
+                      </div>
                     </div>
                     <div class="form-group">
                       <div class="control-label">Complete This Delivery?</div>
@@ -327,48 +347,48 @@
                       <label>Date</label>
                       <input type="datetime-local" name="delivery_date" class="form-control" value="{{ $delivery->delivery_date }}" required>
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                       <label>Receive From</label>
                       <input type="text" class="form-control" name="delivery_to" value="{{ $delivery->delivery_to }}" required>
+                  </div> --}}
+                  <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea name="delivery_remarks" class="form-control" cols="30" rows="6">{{ $delivery->delivery_remarks }}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Image <small class="text-danger">*optional</small></label>
+                    <input type="hidden" name="oldImage" value="{{ $delivery->image }}">
+                    <div class="custom-file">
+                      @if ($delivery->image)
+                      <img src="{{ asset('images/'.$delivery->transmittal_id.'/'.$delivery->image) }}" alt="image" width="200px" class="img-preview-{{ $delivery->id }} img-fluid mb-1">
+                      @else
+                      <img class="img-preview-{{ $delivery->id }} img-fluid mb-1" width="200px">
+                      @endif
+                      <input type="file" class="form-control" name="image" id="image-{{ $delivery->id }}" accept=".jpeg, .png, .jpg, .gif, .svg">
                     </div>
-                    <div class="form-group">
-                      <label>Remarks</label>
-                      <textarea name="delivery_remarks" class="form-control" cols="30" rows="6">{{ $delivery->delivery_remarks }}</textarea>
-                    </div>
-                    <div class="form-group">
-                      <label>Image <small class="text-danger">*optional</small></label>
-                      <input type="hidden" name="oldImage" value="{{ $delivery->image }}">
-                      <div class="custom-file">
-                        @if ($delivery->image)
-                        <img src="{{ asset('images/'.$delivery->transmittal_id.'/'.$delivery->image) }}" alt="image" width="200px" class="img-preview-{{ $delivery->id }} img-fluid mb-1">
-                        @else
-                        <img class="img-preview-{{ $delivery->id }} img-fluid mb-1" width="200px">
-                        @endif
-                        <input type="file" class="form-control" name="image" id="image-{{ $delivery->id }}" accept=".jpeg, .png, .jpg, .gif, .svg">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <div class="control-label">Complete This Delivery?</div>
-                      <label class="custom-switch mt-2">
-                        <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes" {{ $delivery->is_delivered == 'yes' ? 'checked' : null }}>
-                        <span class="custom-switch-indicator"></span>
-                        <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                        <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                      </label>
-                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="control-label">Complete This Delivery?</div>
+                    <label class="custom-switch mt-2">
+                      <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes" {{ $delivery->is_delivered == 'yes' ? 'checked' : null }}>
+                      <span class="custom-switch-indicator"></span>
+                      <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                      <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                    </label>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="modal-footer bg-whitesmoke br">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-info">Save</button>
-        </div>
-      </form>
     </div>
+    <div class="modal-footer bg-whitesmoke br">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <button type="submit" class="btn btn-info">Save</button>
+    </div>
+    </form>
   </div>
+</div>
 </div>
 @endif
 <div class="modal fade" tabindex="-1" role="dialog" id="imageModal-{{ $delivery->id }}">
@@ -395,7 +415,7 @@
 @endsection
 
 @section('scripts')
-<script>
+{{-- <script>
   var sendTemplate = 'Sent to : ' + '\n' +
     'Sent by : ' + '\n' +
     'Contact : ' + '\n' +
@@ -427,7 +447,7 @@
     }
   }
 
-</script>
+</script> --}}
 
 <script>
   // on load if is_delivered is yes then show yes and hide no
@@ -474,6 +494,32 @@
       imgPreview.src = oFREvent.target.result;
     };
   });
+
+  // on load if courier_id is not null, then show #gateway-section
+  var courier = $('#courier-id-{{ $delivery->id }}').val();
+  if (courier) {
+    $('#gateway-section-{{ $delivery->id }}').show();
+  } else {
+    $('#gateway-section-{{ $delivery->id }}').hide();
+  }
+  $('#deliver-to-{{ $delivery->id }}').change(function() {
+    const deliver_to = $('#deliver-to-{{ $delivery->id }}').val();
+    $.ajax({
+      url: `{{ url('deliveries/getRole/${deliver_to}') }}`
+      , type: "GET"
+      , dataType: "JSON"
+      , success: function(data) {
+        console.log(data);
+        if (data.data.role == 'gateway') {
+          $('#gateway-section-{{ $delivery->id }}').show();
+          $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', false);
+        } else {
+          $('#gateway-section-{{ $delivery->id }}').hide();
+          $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', true);
+        }
+      }
+    });
+  });
   @endforeach
 
 </script>
@@ -501,6 +547,26 @@
     };
     xhr.send();
   }
+
+</script>
+<script>
+  $(document).ready(function() {
+    $('.copy-button').click(function() {
+      var targetId = $(this).data('target');
+      var $temp = $("<input>");
+      $("body").append($temp);
+      $temp.val($('#' + targetId).text()).select();
+      document.execCommand("copy");
+      $temp.remove();
+
+      $(this).addClass('copied');
+      $(this).text('Copied');
+      setTimeout(() => {
+        $(this).removeClass('copied');
+        $(this).html('<i class="far fa-copy"></i>');
+      }, 2000);
+    });
+  });
 
 </script>
 

@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->foreignId('project_id')->references('id')->on('projects');
             $table->foreignId('department_id')->references('id')->on('departments');
-            $table->string('level');
+            $table->string('role')->default('user');
             $table->rememberToken();
             $table->timestamps();
         });
