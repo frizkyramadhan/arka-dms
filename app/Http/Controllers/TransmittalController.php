@@ -20,7 +20,7 @@ class TransmittalController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('admin')->only(['trash', 'restore', 'delete']);
+        $this->middleware('administrator')->only(['trash', 'restore', 'delete']);
     }
 
     public function index()
@@ -37,7 +37,7 @@ class TransmittalController extends Controller
     {
         $user = auth()->user();
         if ($request->ajax()) {
-            if ($user->level == 'administrator') {
+            if ($user->role == 'administrator') {
                 $transmittals = Transmittal::leftJoin('projects', 'transmittals.project_id', '=', 'projects.id')
                     ->leftJoin('users AS receivers', 'transmittals.received_by', '=', 'receivers.id')
                     ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
@@ -116,7 +116,7 @@ class TransmittalController extends Controller
             ->whereHas('department', function ($query) {
                 $query->whereId(request()->input('department_id', 0));
             })
-            // ->where('level', '!=', 'administrator')
+            // ->where('role', '!=', 'administrator')
             ->orderBy('full_name', 'asc')
             ->pluck('full_name', 'id');
 
@@ -241,13 +241,41 @@ class TransmittalController extends Controller
         $title = 'Transmittal Form';
         $subtitle = 'Transmittal Details';
         $details = TransmittalDetail::where('transmittal_id', $id)->get();
-        $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
+        $deliveries = Delivery::with(['user', 'receiver'])->where('transmittal_id', $id)->latest()->get();
         $units = Unit::where('unit_status', 1)->orderBy('unit_name', 'asc')->get();
         $transmittal = Transmittal::with(['project', 'user', 'receiver'])->where('id', $id)->first();
         $qrcode = QrCode::format('svg')->size(200)->generate($transmittal->receipt_full_no); //generate QR code dengan ukuran 300 px dan link untuk tracking
-        // dd($transmittal);
 
-        return view('transmittals.show', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'units', 'qrcode'));
+        $user = auth()->user(); // Mendapatkan user yang sedang login
+        $project_id = $user->project_id; // Mendapatkan ID project dari user yang sedang login
+        if ($user->role == 'gateway') {
+            $receivers = User::where('project_id', $project_id)
+                ->orWhere(function ($query) {
+                    $query->where('role', 'gateway');
+                })
+                ->get();
+            $couriers = User::where('project_id', $project_id)
+                ->where(function ($query) {
+                    $query->where('role', 'courier');
+                })
+                ->get();
+        } else {
+            $receivers = User::where('project_id', $project_id)
+                ->orWhere(function ($query) use ($project_id) {
+                    $query->where('role', 'gateway')
+                        ->where('project_id', $project_id);
+                })
+                ->get();
+            $couriers = User::where('project_id', $project_id)
+                ->where(function ($query) {
+                    $query->where('role', 'courier');
+                })
+                ->get();
+        }
+
+        $received_by = Delivery::with('user')->where('transmittal_id', $id)->where('delivery_type', 'receive')->latest()->first();
+
+        return view('transmittals.show', compact('title', 'subtitle', 'transmittal', 'details', 'deliveries', 'units', 'qrcode', 'receivers', 'received_by', 'couriers'));
     }
 
     /**

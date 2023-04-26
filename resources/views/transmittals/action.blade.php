@@ -6,7 +6,12 @@
   @csrf
   <button class="btn btn-icon btn-danger" title="Delete"><i class="fas fa-times"></i></button>
 </form> --}}
-{{ $model->receipt_full_no }}
+<div>
+  <span id="receipt-no-{{ $model->id }}">{{$model->receipt_full_no}}</span>
+  <a href="#" class="copy-button" data-target="receipt-no-{{ $model->id }}">
+    <i class="far fa-copy"></i>
+  </a>
+</div>
 <div class="table-links">
   <a href="{{ url('transmittals/' . $model->id) }}">View</a>
   <div class="bullet"></div>
@@ -18,3 +23,23 @@
     <button class="btn btn-sm btn-danger btn-link text-white">Delete</button>
   </form>
 </div>
+<script>
+  $(document).ready(function() {
+    $('.copy-button').click(function() {
+      var targetId = $(this).data('target');
+      var $temp = $("<input>");
+      $("body").append($temp);
+      $temp.val($('#' + targetId).text()).select();
+      document.execCommand("copy");
+      $temp.remove();
+
+      $(this).addClass('copied');
+      $(this).text('Copied');
+      setTimeout(() => {
+        $(this).removeClass('copied');
+        $(this).html('<i class="far fa-copy"></i>');
+      }, 2000);
+    });
+  });
+
+</script>

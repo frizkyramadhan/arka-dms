@@ -26,7 +26,14 @@ class DashboardController extends Controller
         //     ->where('transmittals.status', '=', 'on delivery')
         //     // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
         //     ->orderBy('transmittals.receipt_no', 'desc')->get();
-        $tf_to_dept = Transmittal::with(['project', 'receiver', 'user', 'transmittal_details'])
+
+        // $tf_to_dept = Transmittal::with(['project', 'receiver', 'user', 'transmittal_details', 'deliveries' => function ($receive) {
+        //     $receive->where('delivery_type', 'receive')->latest()->first();
+        // }])
+
+        $tf_to_dept = Transmittal::with(['project', 'receiver', 'user', 'transmittal_details', 'deliveries' => function ($receive) {
+            $receive->latest()->get();
+        }])
             ->whereHas('receiver', function ($query) use ($user) {
                 $query->where('department_id', $user->department_id);
                 $query->where('project_id', $user->project_id);
@@ -44,10 +51,10 @@ class DashboardController extends Controller
             ->where('transmittals.status', '=', 'on delivery')
             // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
             ->orderBy('transmittals.receipt_no', 'desc')->get();
-        $tf_total = Transmittal::get()->count();
-        $tf_p = Transmittal::where('status', 'published')->get()->count();
-        $tf_o = Transmittal::where('status', 'on delivery')->get()->count();
-        $tf_d = Transmittal::where('status', 'delivered')->get()->count();
+        $tf_total = Transmittal::where('user_id', auth()->user()->id)->get()->count();
+        $tf_p = Transmittal::where('user_id', auth()->user()->id)->where('status', 'published')->get()->count();
+        $tf_o = Transmittal::where('user_id', auth()->user()->id)->where('status', 'on delivery')->get()->count();
+        $tf_d = Transmittal::where('user_id', auth()->user()->id)->where('status', 'delivered')->get()->count();
         $projects = DB::table('projects')
             ->select(
                 'id',

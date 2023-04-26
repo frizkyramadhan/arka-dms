@@ -76,60 +76,60 @@
                     <label>Date</label>
                     <input type="datetime-local" id="datetime" name="delivery_date" class="form-control" value="{{ old('delivery_date') }}" required>
                   </div>
-                  <div class="form-group">
+                  {{-- <div class="form-group">
                     <label>Receive From</label>
                     <input type="text" class="form-control" name="delivery_to" value="{{ old('delivery_to') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Remarks</label>
-                    <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="6">{{ old('delivery_remarks') }}</textarea>
-                  </div>
-                  <div class="form-group">
-                    <label>Image <small class="text-danger">*optional, max 5mb</small></label>
-                    <input type="file" class="form-control" name="image" accept=".jpeg, .png, .jpg, .gif, .svg" onchange="validateSize()">
-                  </div>
+                </div> --}}
+                <div class="form-group">
+                  <label>Remarks</label>
+                  <textarea name="delivery_remarks" id="delivery_remarks" class="form-control" cols="30" rows="6">{{ old('delivery_remarks') }}</textarea>
                 </div>
-                <div class="col-md-6 mb-2">
-                  <div class="form-group">
-                    <div class="control-label">Complete This Delivery?</div>
-                    <label class="custom-switch mt-2">
-                      <input id="is-delivered" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
-                      <span class="custom-switch-indicator"></span>
-                      <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                      <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                    </label>
-                  </div>
-                  {{-- <div class="form-group">
+                <div class="form-group">
+                  <label>Image <small class="text-danger">*optional, max 5mb</small></label>
+                  <input type="file" class="form-control" name="image" accept=".jpeg, .png, .jpg, .gif, .svg" onchange="validateSize()">
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-group">
+                  <div class="control-label">Complete This Delivery?</div>
+                  <label class="custom-switch mt-2">
+                    <input id="is-delivered" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
+                    <span class="custom-switch-indicator"></span>
+                    <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                    <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                  </label>
+                </div>
+                {{-- <div class="form-group">
                     <label>Unit Type <small class="text-danger">*optional</small></label>
                     <select class="custom-select select2" name="unit_id" id="unit_id">
                       <option value="">-- Select Unit --</option>
                       @foreach ($units as $item)
                       <option value="{{ $item->id }}" {{ old('unit_id') == $item->id ? 'selected' : null }}>
-                  {{ $item->unit_name }}</option>
-                  @endforeach
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
-                  <input type="text" class="form-control" name="nopol" value="{{ old('nopol') }}">
-                </div>
-                <div class="form-group">
-                  <label>PO No. <small class="text-danger">*optional</small></label>
-                  <input type="text" class="form-control" name="po_no" value="{{ old('po_no') }}">
-                </div>
-                <div class="form-group">
-                  <label>DO. No. <small class="text-danger">*optional</small></label>
-                  <input type="text" class="form-control" name="do_no" value="{{ old('do_no') }}">
-                </div> --}}
+                {{ $item->unit_name }}</option>
+                @endforeach
+                </select>
               </div>
+              <div class="form-group">
+                <label>Unit No. / Plate Number <small class="text-danger">*optional</small></label>
+                <input type="text" class="form-control" name="nopol" value="{{ old('nopol') }}">
+              </div>
+              <div class="form-group">
+                <label>PO No. <small class="text-danger">*optional</small></label>
+                <input type="text" class="form-control" name="po_no" value="{{ old('po_no') }}">
+              </div>
+              <div class="form-group">
+                <label>DO. No. <small class="text-danger">*optional</small></label>
+                <input type="text" class="form-control" name="do_no" value="{{ old('do_no') }}">
+              </div> --}}
             </div>
         </div>
-        <div class="card-footer bg-whitesmoke text-md-right">
-          <button class="btn btn-primary" id="save-btn">Receive</button>
-        </div>
-        </form>
       </div>
+      <div class="card-footer bg-whitesmoke text-md-right">
+        <button class="btn btn-primary" id="save-btn">Receive</button>
+      </div>
+      </form>
     </div>
+  </div>
   </div>
   </div>
 </section>
@@ -177,8 +177,13 @@
   $('#no').show();
   $('#is-delivered').change(function() {
     if ($(this).is(':checked')) {
-      $('#yes').show();
-      $('#no').hide();
+      var confirmMsg = confirm("Klik OK jika pengiriman sudah sampai di tujuan akhir!");
+      if (confirmMsg == true) {
+        $('#yes').show();
+        $('#no').hide();
+      } else {
+        $(this).prop('checked', false);
+      }
     } else {
       $('#yes').hide();
       $('#no').show();
@@ -310,17 +315,18 @@
                                           <tr>
                                             <th>Delivery</th>
                                             <th>By</th>
-                                            <th>To/From</th>
                                             <th>Date</th>
                                           </tr>
                                         </thead>
                                       <tbody>`;
             $.each(history, function(index, value) {
-              history_view += `<tr>
-                                <td>` + value.delivery_type + `</td>
-                                <td>` + value.user.full_name + `</td>
-                                <td>` + value.delivery_to + `</td>
-                                <td>` + moment(value.delivery_date).format('DD MMMM YYYY, hh:mm A') + `</td>
+              history_view += `<tr>`;
+              if (value.delivery_type == 'send') {
+                history_view += `<td><span class="badge badge-success">Send</span></td><td>` + value.receiver.full_name + `</td>`;
+              } else {
+                history_view += `<td><span class="badge badge-info">Receive</span></td><td>` + value.user.full_name + `</td>`;
+              }
+              history_view += `<td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
                               </tr>`;
             });
             history_view += `</tbody>

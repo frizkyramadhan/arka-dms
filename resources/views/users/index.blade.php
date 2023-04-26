@@ -42,7 +42,7 @@
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->project->project_code }}</td>
                     <td>{{ $user->department->dept_name }}</td>
-                    <td>{{ $user->level }}</td>
+                    <td>{{ $user->role }}</td>
                     <td class="text-center">
                       <a href="{{ url('users/' . $user->id . '/edit') }}" class="btn btn-icon btn-primary"><i class="far fa-edit"></i></a>
                       <form action="{{ url('users/' . $user->id) }}" method="post" onsubmit="return confirm('Are you sure want to delete this data?')" class="d-inline">

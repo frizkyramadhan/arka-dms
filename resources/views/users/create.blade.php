@@ -85,9 +85,9 @@
               <div class="form-group row mb-4">
                 <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Role</label>
                 <div class="col-sm-12 col-md-7">
-                  <select class="form-control select2 @error('level') is-invalid @enderror" name="level">
+                  <select class="form-control select2 @error('role') is-invalid @enderror" name="role">
                     <option value="user">User</option>
-                    <option value="superuser">Super User</option>
+                    <option value="gateway">Gateway</option>
                     <option value="administrator">Administrator</option>
                   </select>
                 </div>

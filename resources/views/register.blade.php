@@ -83,7 +83,18 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
-                  <input type="hidden" class="form-control" name="level" value="user">
+                  <div class="form-group">
+                    <label>Role</label>
+                    <select class="form-control @error('role') is-invalid @enderror" name="role">
+                      <option value="">- Select Role -</option>
+                      <option value="user" {{ old('role') == "user" ? 'selected' : null }}>User</option>
+                      <option value="courier" {{ old('role') == "courier" ? 'selected' : null }}>Courier</option>
+                      <option value="gateway" {{ old('role') == "gateway" ? 'selected' : null }}>Gateway</option>
+                    </select>
+                    @error('role')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
                   <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-lg btn-block">
                       Register

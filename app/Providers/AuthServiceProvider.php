@@ -31,18 +31,23 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         // make gate for admin
-        Gate::define('admin', function ($user) {
-            return $user->level == 'administrator';
+        Gate::define('administrator', function ($user) {
+            return $user->role == 'administrator';
         });
 
-        // make gate for superuser
-        Gate::define('superuser', function ($user) {
-            return $user->level == 'superuser';
+        // make gate for gateway
+        Gate::define('gateway', function ($user) {
+            return $user->role == 'gateway';
+        });
+
+        // make gate for courier
+        Gate::define('courier', function ($user) {
+            return $user->role == 'courier';
         });
 
         // make gate for user
         Gate::define('user', function ($user) {
-            return $user->level == 'user';
+            return $user->role == 'user';
         });
     }
 }
