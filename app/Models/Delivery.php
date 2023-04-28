@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Unit;
 use App\Models\User;
-use App\Models\Transport;
 use App\Models\Transmittal;
+use App\Models\DeliveryUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -37,18 +36,8 @@ class Delivery extends Model
         return $this->belongsTo(User::class, 'deliver_to');
     }
 
-    public function courier()
+    public function delivery_user()
     {
-        return $this->belongsTo(User::class, 'courier_id');
-    }
-
-    public function unit()
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
-    public function transport()
-    {
-        return $this->belongsTo(Transport::class);
+        return $this->hasMany(DeliveryUser::class, 'id', 'delivery_id');
     }
 }

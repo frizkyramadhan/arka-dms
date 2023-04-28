@@ -249,7 +249,7 @@ class DeliveryController extends Controller
     {
         $transmittal = Transmittal::with(['deliveries' => function ($query) {
             $query->orderByDesc('id');
-        }, 'deliveries.user', 'deliveries.unit', 'deliveries.receiver', 'transmittal_details', 'project', 'department', 'receiver'])->where('receipt_full_no', $receiptNo)->first();
+        }, 'deliveries.user', 'deliveries.receiver', 'transmittal_details', 'project', 'department', 'receiver'])->where('receipt_full_no', $receiptNo)->first();
 
         if ($transmittal) {
             return response()->json([

@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Delivery;
 use App\Models\Department;
 use App\Models\Transmittal;
+use App\Models\DeliveryUser;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -67,5 +68,10 @@ class User extends Authenticatable
     public function delivery()
     {
         return $this->hasMany(Delivery::class, 'user_id');
+    }
+
+    public function delivery_user()
+    {
+        return $this->hasMany(DeliveryUser::class, 'user_id');
     }
 }
