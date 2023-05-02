@@ -149,7 +149,7 @@
               <tr>
                 <th scope="col">No</th>
                 <th scope="col">Delivery</th>
-                <th scope="col">By</th>
+                <th scope="col">Person</th>
                 <th scope="col">Date</th>
                 <th scope="col">Remarks</th>
                 <th scope="col" class="text-center">Action</th>
@@ -173,9 +173,9 @@
                 </td>
                 <td>
                   @if ($delivery->delivery_type == 'send')
-                  {{ $delivery->receiver->full_name }}
+                  to : {{ $delivery->receiver->full_name }}
                   @else
-                  {{ $delivery->user->full_name }}
+                  by : {{ $delivery->user->full_name }}
                   @endif
                 </td>
                 <td>{{ date('d-m-Y H:m', strtotime($delivery->delivery_date)) }}</td>

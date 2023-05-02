@@ -127,6 +127,64 @@
         </a>
       </div>
     </div>
+    @can('courier')
+    <div class="col-12 col-md-12 col-lg-12">
+      <div class="card card-danger">
+        <div class="card-header">
+          <h4>Delivery Order (Courier Only)</h4>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover table-condensed" id="to-you">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Action</th>
+                  <th>Receipt</th>
+                  <th>Date</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Attn</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if ($deliveryOrders->count() == 0)
+                <tr>
+                  <td colspan="7" class="text-center">No Data Available</td>
+                </tr>
+                @endif
+                @foreach ($deliveryOrders as $do)
+                <tr>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-warning">Accept</button>
+                  </td>
+                  <td>{{ $do->transmittal->receipt_full_no }}</td>
+                  <td>{{ date('d-M-Y', strtotime($do->transmittal->receipt_date)) }}</td>
+                  <td>{{ $do->user->full_name }}</td>
+                  <td>
+                    @if ($do->transmittal->project_id == null)
+                    {{ $do->transmittal->to }}
+                    @else
+                    {{ $do->transmittal->project->project_code }}
+                    @endif
+                  </td>
+                  <td>
+                    @if ($do->transmittal->attn == null)
+                    {{ $do->transmittal->receiver->full_name }}
+                    @else
+                    {{ $do->transmittal->attn }}
+                    @endif
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endcan
     <div class="col-12 col-md-6 col-lg-6">
       {{-- transmittal to user --}}
       <div class="card card-primary">
@@ -624,7 +682,7 @@
                                 <thead>
                                   <tr>
                                     <th>Delivery</th>
-                                    <th>By</th>
+                                    <th>Person</th>
                                     <th>Date</th>
                                     <th>Remarks</th>
                                   </tr>
@@ -634,10 +692,10 @@
               history_view += `<tr>`;
               if (value.delivery_type == 'send') {
                 history_view += `<td><a href="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" data-toggle="modal" data-target="#image-` + value.id + `"><span class="badge badge-success">Send</span></a></td>
-                                 <td>` + value.receiver.full_name + `</td>`;
+                                 <td>to : ` + value.receiver.full_name + `</td>`;
               } else {
                 history_view += `<td><a href="{{ asset('images/` + value.transmittal_id + `/` + value.image + `') }}" data-toggle="modal" data-target="#image-` + value.id + `"><span class="badge badge-info">Receive</span></a></td>
-                                 <td>` + value.user.full_name + `</td>`;
+                                 <td>by : ` + value.user.full_name + `</td>`;
               }
               history_view += `<td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
                                <td>` + value.delivery_remarks + `</td>

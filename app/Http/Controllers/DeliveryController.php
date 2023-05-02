@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Delivery;
+use App\Models\DeliveryUser;
 use App\Models\Transmittal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -146,6 +147,7 @@ class DeliveryController extends Controller
             $delivery->is_delivered = "no";
         }
         $delivery->save();
+
 
         // $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $transmittal_id)->first();
         // $deliveries = Delivery::where('transmittal_id', $transmittal_id)->latest()->get();

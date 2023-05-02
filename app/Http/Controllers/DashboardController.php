@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Delivery;
 use App\Models\Transmittal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -71,6 +72,9 @@ class DashboardController extends Controller
             )
             ->orderBy('dept_name', 'asc')
             ->get();
-        return view('home', compact('title', 'tfd_subtitle', 'tf_to_dept', 'tf_total', 'tf_p', 'tf_o', 'tf_d', 'projects', 'departments', 'tfu_subtitle', 'tf_to_user'));
+        $deliveryOrders = Delivery::with(['transmittal', 'transmittal.project', 'receiver', 'user'])->where('courier_id', $user->id)
+            ->orderBy('id', 'desc')
+            ->get();
+        return view('home', compact('title', 'tfd_subtitle', 'tf_to_dept', 'tf_total', 'tf_p', 'tf_o', 'tf_d', 'projects', 'departments', 'tfu_subtitle', 'tf_to_user', 'deliveryOrders'));
     }
 }
