@@ -26,11 +26,13 @@ class DeliveryController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
         $transmittal_id = $request->transmittal_id;
+        $transmittal = Transmittal::find($transmittal_id);
         // check if transmittal_id is exist in delivery table
         if (Delivery::where('transmittal_id', $transmittal_id)->doesntExist()) {
             // change transmittal status to delivered
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
+            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
         }
 
         if ($transmittal_id == null) {
@@ -55,7 +57,6 @@ class DeliveryController extends Controller
         // if request has image
         if ($request->hasFile('image')) {
             // get transmittal by id
-            $transmittal = Transmittal::find($transmittal_id);
             $directories = Storage::directories('public/images/' . $transmittal->id);
             if (count($directories) == 0) {
                 $path = public_path() . '/images/' . $transmittal->id;
@@ -66,11 +67,16 @@ class DeliveryController extends Controller
             $image->move(public_path() . '/images/' . $transmittal->id, $name);
             $delivery->image = $name;
         }
-        if ($request->is_delivered == "yes") {
-            $delivery->is_delivered = "yes";
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
-        } else {
-            $delivery->is_delivered = "no";
+        // jika delivery type = send maka status = opened
+
+        if ($request->delivery_type == "send") {
+            $delivery->delivery_status = "opened";
+            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+        } else if ($request->delivery_type == "receive") {
+            $delivery->delivery_status = "closed";
+            if ($transmittal->received_by == $user->id) {
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+            }
         }
         $delivery->save();
 
@@ -140,11 +146,14 @@ class DeliveryController extends Controller
             $image->move(public_path() . '/images/' . $transmittal->id, $name);
             $delivery->image = $name;
         }
-        if ($request->is_delivered == "yes") {
-            $delivery->is_delivered = "yes";
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'delivered']);
-        } else {
-            $delivery->is_delivered = "no";
+        if ($request->delivery_type == "send") {
+            $delivery->delivery_status = "opened";
+            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+        } else if ($request->delivery_type == "receive") {
+            $delivery->delivery_status = "closed";
+            if ($transmittal->received_by == $user->id) {
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+            }
         }
         $delivery->save();
 
@@ -188,12 +197,12 @@ class DeliveryController extends Controller
         // if delivery is the last one, delete delivery and change transmittal status to 'published'
         $deliveries = Delivery::where('transmittal_id', $transmittal_id)->get();
         if (count($deliveries) == 0) {
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'published']);
+            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'published']);
         }
-        // if delivery with is_delivered = 'yes' is deleted then change transmittal status to 'on delivery'
-        $is_delivered = Delivery::where('transmittal_id', $transmittal_id)->where('is_delivered', 'yes')->get();
-        if (count($is_delivered) == 0) {
-            Transmittal::where('id', $transmittal_id)->update(['status' => 'on delivery']);
+        // if delivery with delivery_status = 'yes' is deleted then change transmittal status to 'on delivery'
+        $delivery_status = Delivery::where('transmittal_id', $transmittal_id)->where('delivery_status', 'closed')->get();
+        if (count($delivery_status) == 0) {
+            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
         }
 
 
@@ -247,12 +256,36 @@ class DeliveryController extends Controller
         return view('deliveries.receive', compact('title', 'subtitle'));
     }
 
-    public function search($receiptNo)
+    public function searchGet($receiptNo)
     {
         $transmittal = Transmittal::with(['deliveries' => function ($query) {
             $query->orderByDesc('id');
         }, 'deliveries.user', 'deliveries.receiver', 'transmittal_details', 'project', 'department', 'receiver'])->where('receipt_full_no', $receiptNo)->first();
 
+        if ($transmittal) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $transmittal
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'data' => 'No data found'
+            ]);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $receiptNo = $request->input('receiptNo');
+
+        $transmittal = Transmittal::with(['deliveries' => function ($query) {
+            $query->orderByDesc('id');
+        }, 'deliveries.user', 'deliveries.receiver', 'transmittal_details', 'project', 'department', 'receiver', 'delivery_orders' => function ($query) {
+            $query->orderByDesc('id');
+        }])->where('receipt_full_no', $receiptNo)->first();
+
+        // dd($transmittal);
         if ($transmittal) {
             return response()->json([
                 'status' => 'success',

@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Models\User;
 use App\Traits\Uuids;
 use App\Models\Project;
+use App\Models\Delivery;
 use App\Models\Department;
+use App\Models\DeliveryOrder;
 use App\Models\TransmittalDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,5 +47,10 @@ class Transmittal extends Model
     public function deliveries()
     {
         return $this->hasMany(Delivery::class);
+    }
+
+    public function delivery_orders()
+    {
+        return $this->hasManyThrough(DeliveryOrder::class, Delivery::class);
     }
 }

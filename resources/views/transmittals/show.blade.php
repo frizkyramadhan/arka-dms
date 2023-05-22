@@ -19,12 +19,12 @@
           <div class="card-header">
             <h4>
               Status:
-              @if ($transmittal->status == 'published')
-              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-warning">{{ $transmittal->status }}</span></a>
-              @elseif ($transmittal->status == 'on delivery')
-              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-success">{{ $transmittal->status }}</span></a>
-              @elseif ($transmittal->status == 'delivered')
-              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-info">{{ $transmittal->status }}</span></a>
+              @if ($transmittal->transmittal_status == 'published')
+              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-warning">{{ $transmittal->transmittal_status }}</span></a>
+              @elseif ($transmittal->transmittal_status == 'on delivery')
+              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-success">{{ $transmittal->transmittal_status }}</span></a>
+              @elseif ($transmittal->transmittal_status == 'delivered')
+              <a href="#" data-toggle="modal" data-target="#deliveryModal"><span class="badge badge-info">{{ $transmittal->transmittal_status }}</span></a>
               @endif
             </h4>
           </div>
@@ -142,63 +142,109 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body p-0">
-        <div class="table-responsive" style="overflow-x: auto">
-          <table class="table table-hover" style="width: 100%; white-space: nowrap">
-            <thead>
-              <tr>
-                <th scope="col">No</th>
-                <th scope="col">Delivery</th>
-                <th scope="col">Person</th>
-                <th scope="col">Date</th>
-                <th scope="col">Remarks</th>
-                <th scope="col" class="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (count($deliveries) == 0)
-              <tr>
-                <td colspan="7" class="text-center">No Deliveries Available</td>
-              </tr>
-              @else
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12">
+            <div class="activities">
               @foreach ($deliveries as $delivery)
-              <tr>
-                <th scope="row">{{ $loop->iteration }}</th>
-                <td>
-                  @if ($delivery->delivery_type == 'send')
-                  <a href="#" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}" title="Click to see the image"><span class="badge badge-success">Send</span></a>
-                  @else
-                  <a href="#" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}" title="Click to see the image"><span class="badge badge-info">Receive</span></a>
+              <div class="activity">
+                @if($delivery->delivery_type == 'send')
+                <div class="activity-icon bg-success text-white">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                @else
+                <div class="activity-icon bg-info text-white">
+                  <i class="fas fa-file-signature"></i>
+                </div>
+                @endif
+                <div class="activity-detail">
+                  <div class="mb-2">
+                    <span class="bullet"></span>
+                    @if($delivery->delivery_type == 'send')
+                    <span class="text-job">{{ $delivery->delivery_type }} to {{ $delivery->receiver->full_name }}</span>
+                    @else
+                    <span class="text-job">{{ $delivery->delivery_type }} by {{ $delivery->user->full_name }}</span>
+                    @endif
+                    <span class="bullet"></span>
+                    <div class="float-right dropdown">
+                      @if ($delivery->delivery_type == 'send')
+                      <a href="#" class="btn btn-icon btn-warning" data-toggle="modal" data-target="#sendModal-{{ $delivery->id }}"><i class="fas fa-edit"></i></a>
+                      @else
+                      <a href="#" class="btn btn-icon btn-warning" data-toggle="modal" data-target="#receiveModal-{{ $delivery->id }}"><i class="fas fa-edit"></i></a>
+                      @endif
+                      <form action="{{ url('deliveries/' . $delivery->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('delete')
+                        <button type="submit" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure want to delete this record?')"><i class="fas fa-trash-alt"></i></button>
+                      </form>
+                    </div>
+                  </div>
+                  <p>{{ \Carbon\Carbon::parse($delivery->delivery_date)->locale('id')->isoFormat('dddd, D MMMM Y') }}
+                  </p>
+                  <p>{{ $delivery->delivery_remarks }}</p>
+                  <p><a href="{{ asset('images/'.$delivery->transmittal_id .'/'. $delivery->image) }}" data-toggle="modal" data-target="#imageModal-{{ $delivery->id }}">{{ $delivery->image }}</a></p>
+                  @if($delivery->courier_id)
+                  <div class="ml-4">
+                    <div class="col-md-12">
+                      <p class="text-job">Delivery Notes (by Courier):</p>
+                      <div class="table-responsive" style="overflow-x: auto">
+                        <table class="table table-sm table-striped table-hover table-condensed" width=100%>
+                          <thead>
+                            <tr>
+                              <th>Status</th>
+                              <th>Remarks</th>
+                              <th>Date</th>
+                              <th>Image</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach ($delivery->delivery_orders as $deliveryOrder)
+                            <tr>
+                              <td>
+                                @if ($deliveryOrder->transport_status == 'pending')
+                                <span class="badge badge-warning">Pending</span>
+                                @elseif ($deliveryOrder->transport_status == 'on delivery')
+                                <span class="badge badge-success">On Delivery</span>
+                                @elseif ($deliveryOrder->transport_status == 'delivered')
+                                <span class="badge badge-info">Delivered</span>
+                                @elseif ($deliveryOrder->transport_status == 'cancelled')
+                                <span class="badge badge-danger">Cancelled</span>
+                                @elseif ($deliveryOrder->transport_status == 'returned')
+                                <span class="badge badge-secondary">Returned</span>
+                                @endif
+                              </td>
+                              <td>{{ $deliveryOrder->transport_remarks }}</td>
+                              <td>{{ \Carbon\Carbon::parse($deliveryOrder->transport_date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</td>
+                              <td><a href="{{ asset('images/'.$delivery->transmittal_id .'/courier/'. $deliveryOrder->transport_image) }}" data-toggle="modal" data-target="#imageDeliveryOrderModal-{{ $deliveryOrder->id }}">{{ $deliveryOrder->transport_image }}</a></td>
+                            </tr>
+
+                            <div class="modal fade" tabindex="-1" role="dialog" id="imageDeliveryOrderModal-{{ $deliveryOrder->id }}">
+                              <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-body">
+                                    <figure>
+                                      <img src="{{ asset('images/'.$delivery->transmittal_id .'/courier/'.$deliveryOrder->transport_image) }}" class="img-fluid" alt="image">
+                                      <figcaption class="text-center">{{ $deliveryOrder->transport_image }}</figcaption>
+                                    </figure>
+                                  </div>
+                                  <div class="modal-footer bg-whitesmoke br">
+                                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                   @endif
-                </td>
-                <td>
-                  @if ($delivery->delivery_type == 'send')
-                  to : {{ $delivery->receiver->full_name }}
-                  @else
-                  by : {{ $delivery->user->full_name }}
-                  @endif
-                </td>
-                <td>{{ date('d-m-Y H:m', strtotime($delivery->delivery_date)) }}</td>
-                <td>{{ $delivery->delivery_remarks }}</td>
-                <td class="text-center">
-                  @if ($delivery->delivery_type == 'send')
-                  <a href="#" class="btn btn-icon btn-warning" data-toggle="modal" data-target="#sendModal-{{ $delivery->id }}"><i class="fas fa-edit"></i></a>
-                  @else
-                  <a href="#" class="btn btn-icon btn-warning" data-toggle="modal" data-target="#receiveModal-{{ $delivery->id }}"><i class="fas fa-edit"></i></a>
-                  @endif
-                  {{-- <a href="{{ url('transmittals/' . $transmittal->id . '/delivery/delete/' . $delivery->id) }}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure want to delete this record?')"><i class="fas fa-trash-alt"></i></a> --}}
-                  {{-- button delete without modal--}}
-                  <form action="{{ url('deliveries/' . $delivery->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('delete')
-                    <button type="submit" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure want to delete this record?')"><i class="fas fa-trash-alt"></i></button>
-                  </form>
-                </td>
-              </tr>
+                </div>
+              </div>
               @endforeach
-              @endif
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -534,6 +580,7 @@
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}", true);
     xhr.onreadystatechange = function() {
+      console.log(xhr)
       if (xhr.readyState === 4 && xhr.status === 200) {
         printWindow.document.write('<style type="text/css">' + xhr.responseText + '</style>');
         printWindow.document.write('</head><body>');

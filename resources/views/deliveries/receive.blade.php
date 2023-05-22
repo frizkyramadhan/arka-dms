@@ -211,7 +211,7 @@
 
       // Lakukan request ke server menggunakan AJAX dengan jQuery
       $.ajax({
-        url: `{{ url('deliveries/search/${receiptNo}') }}`
+        url: `{{ url('deliveries/searchGet/${receiptNo}') }}`
         , type: 'GET'
         , success: function(data) {
           console.log(data)
@@ -314,7 +314,7 @@
                                         <thead>
                                           <tr>
                                             <th>Delivery</th>
-                                            <th>By</th>
+                                            <th>Person</th>
                                             <th>Date</th>
                                           </tr>
                                         </thead>
@@ -322,9 +322,9 @@
             $.each(history, function(index, value) {
               history_view += `<tr>`;
               if (value.delivery_type == 'send') {
-                history_view += `<td><span class="badge badge-success">Send</span></td><td>` + value.receiver.full_name + `</td>`;
+                history_view += `<td><span class="badge badge-success">Send</span></td><td>to : ` + value.receiver.full_name + `</td>`;
               } else {
-                history_view += `<td><span class="badge badge-info">Receive</span></td><td>` + value.user.full_name + `</td>`;
+                history_view += `<td><span class="badge badge-info">Receive</span></td><td>by : ` + value.user.full_name + `</td>`;
               }
               history_view += `<td>` + moment(value.delivery_date).format('DD MMMM YYYY HH:mm') + `</td>
                               </tr>`;
