@@ -78,13 +78,15 @@ class TransmittalController extends Controller
                         return $transmittals->attn;
                     }
                 })
-                ->addColumn('status', function ($transmittals) {
-                    if ($transmittals->status == 'published') {
-                        return '<span class="badge badge-warning">' . $transmittals->status . '</span>';
-                    } elseif ($transmittals->status == 'on delivery') {
-                        return '<span class="badge badge-success">' . $transmittals->status . '</span>';
-                    } elseif ($transmittals->status == 'delivered') {
-                        return '<span class="badge badge-info">' . $transmittals->status . '</span>';
+                ->addColumn('transmittal_status', function ($transmittals) {
+                    if ($transmittals->transmittal_status == 'published') {
+                        return '<span class="badge badge-warning">' . $transmittals->transmittal_status . '</span>';
+                    } elseif ($transmittals->transmittal_status == 'on delivery') {
+                        return '<span class="badge badge-success">' . $transmittals->transmittal_status . '</span>';
+                    } elseif ($transmittals->transmittal_status == 'delivered') {
+                        return '<span class="badge badge-info">' . $transmittals->transmittal_status . '</span>';
+                    } elseif ($transmittals->transmittal_status == 'cancelled') {
+                        return '<span class="badge badge-danger">' . $transmittals->transmittal_status . '</span>';
                     }
                 })
                 ->filter(function ($instance) use ($request) {
@@ -98,12 +100,12 @@ class TransmittalController extends Controller
                                 ->orWhere('attn', 'LIKE', "%$search%")
                                 ->orWhere('creators.full_name', 'LIKE', "%$search%")
                                 ->orWhere('receivers.full_name', 'LIKE', "%$search%")
-                                ->orWhere('status', 'LIKE', "%$search%");
+                                ->orWhere('transmittal_status', 'LIKE', "%$search%");
                         });
                     }
                 })
                 ->addColumn('action', 'transmittals.action')
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['transmittal_status', 'action'])
                 ->toJson();
         }
     }
@@ -189,7 +191,7 @@ class TransmittalController extends Controller
             $transmittal->to = $data['to'];
             $transmittal->attn = $data['attn'];
             $transmittal->received_by = $data['received_by'] ?? null;
-            $transmittal->status = 'published';
+            $transmittal->transmittal_status = 'published';
             $transmittal->user_id = auth()->user()->id;
             $transmittal->save();
 
@@ -241,7 +243,9 @@ class TransmittalController extends Controller
         $title = 'Transmittal Form';
         $subtitle = 'Transmittal Details';
         $details = TransmittalDetail::where('transmittal_id', $id)->get();
-        $deliveries = Delivery::with(['user', 'receiver'])->where('transmittal_id', $id)->latest()->get();
+        $deliveries = Delivery::with(['user', 'receiver', 'delivery_orders' => function ($query) {
+            $query->orderBy('id', 'desc');
+        }])->where('transmittal_id', $id)->latest()->get();
         $units = Unit::where('unit_status', 1)->orderBy('unit_name', 'asc')->get();
         $transmittal = Transmittal::with(['project', 'user', 'receiver'])->where('id', $id)->first();
         $qrcode = QrCode::format('svg')->size(200)->generate($transmittal->receipt_full_no); //generate QR code dengan ukuran 300 px dan link untuk tracking
@@ -446,17 +450,19 @@ class TransmittalController extends Controller
                     return $transmittals->attn;
                 }
             })
-            ->addColumn('status', function ($transmittals) {
-                if ($transmittals->status == 'published') {
-                    return '<span class="badge badge-warning">' . $transmittals->status . '</span>';
-                } elseif ($transmittals->status == 'on delivery') {
-                    return '<span class="badge badge-info">' . $transmittals->status . '</span>';
-                } elseif ($transmittals->status == 'delivered') {
-                    return '<span class="badge badge-success">' . $transmittals->status . '</span>';
+            ->addColumn('transmittal_status', function ($transmittals) {
+                if ($transmittals->transmittal_status == 'published') {
+                    return '<span class="badge badge-warning">' . $transmittals->transmittal_status . '</span>';
+                } elseif ($transmittals->transmittal_status == 'on delivery') {
+                    return '<span class="badge badge-info">' . $transmittals->transmittal_status . '</span>';
+                } elseif ($transmittals->transmittal_status == 'delivered') {
+                    return '<span class="badge badge-success">' . $transmittals->transmittal_status . '</span>';
+                } elseif ($transmittals->transmittal_status == 'cancelled') {
+                    return '<span class="badge badge-danger">' . $transmittals->transmittal_status . '</span>';
                 }
             })
             ->addColumn('action', 'transmittals.action')
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['transmittal_status', 'action'])
             ->toJson();
     }
 

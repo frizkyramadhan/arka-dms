@@ -72,7 +72,7 @@
 
       // Lakukan request ke server menggunakan AJAX dengan jQuery
       $.ajax({
-        url: `{{ url('deliveries/search/${receiptNo}') }}`
+        url: `{{ url('deliveries/searchGet/${receiptNo}') }}`
         , type: 'GET'
         , success: function(data) {
           // Setelah mendapatkan data receipt, tampilkan dalam HTML

@@ -49,5 +49,10 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('user', function ($user) {
             return $user->role == 'user';
         });
+
+        // make gate for administrator and courier
+        Gate::define('admin-courier', function ($user) {
+            return in_array($user->role, ['administrator', 'courier']);
+        });
     }
 }

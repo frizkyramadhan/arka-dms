@@ -17,11 +17,18 @@
           <span>Transmittal Forms</span>
         </a>
       </li>
-      <li class="{{ Request::is('trackings*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ url('trackings') }}"><i class="fas fa-search-location"></i>
-          <span>Tracking</span>
+      @can('admin-courier')
+      <li class="{{ Request::is('delivery_orders*') ? 'active' : '' }}">
+        <a class=" nav-link" href="{{ url('delivery_orders') }}"><i class="fas fa-boxes"></i>
+          <span>Delivery Orders</span>
         </a>
       </li>
+      @endcan
+      {{-- <li class="{{ Request::is('trackings*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ url('trackings') }}"><i class="fas fa-search-location"></i>
+        <span>Tracking</span>
+      </a>
+      </li> --}}
       <li class="{{ Request::is('deliveries/send*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('deliveries/send') }}"><i class="fas fa-shipping-fast"></i>
           <span>Send</span>

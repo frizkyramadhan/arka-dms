@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Unit;
 use App\Models\User;
 use App\Models\Transmittal;
-use App\Models\DeliveryUser;
+use App\Models\DeliveryOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -26,6 +27,11 @@ class Delivery extends Model
         return $this->belongsTo(Transmittal::class);
     }
 
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -36,8 +42,8 @@ class Delivery extends Model
         return $this->belongsTo(User::class, 'deliver_to');
     }
 
-    public function delivery_user()
+    public function delivery_orders()
     {
-        return $this->hasMany(DeliveryUser::class, 'id', 'delivery_id');
+        return $this->hasMany(DeliveryOrder::class);
     }
 }

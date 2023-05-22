@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDeliveryUsersTable extends Migration
+class CreateDeliveryOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateDeliveryUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('delivery_users', function (Blueprint $table) {
+        Schema::create('delivery_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('delivery_id')->references('id')->on('deliveries')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade'); // as courier
             // $table->foreignId('unit_id')->nullable()->references('id')->on('units');
             // $table->string('nopol')->nullable();
-            $table->string('transport_status')->nullable(); // pending, on delivery, delivered, cancelled, returned
+            $table->enum('transport_status', ['pending', 'on delivery', 'delivered', 'cancelled', 'returned'])->default('pending');
             $table->dateTime('transport_date', 0)->nullable();
             $table->text('transport_remarks')->nullable();
             $table->string('transport_image')->nullable();
@@ -34,6 +34,6 @@ class CreateDeliveryUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('delivery_user');
+        Schema::dropIfExists('delivery_orders');
     }
 }

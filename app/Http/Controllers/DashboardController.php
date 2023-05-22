@@ -24,7 +24,7 @@ class DashboardController extends Controller
         //     ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
         //     ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
         //     ->where('receivers.department_id', $user->department_id)
-        //     ->where('transmittals.status', '=', 'on delivery')
+        //     ->where('transmittals.transmittal_status', '=', 'on delivery')
         //     // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
         //     ->orderBy('transmittals.receipt_no', 'desc')->get();
 
@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 $query->where('department_id', $user->department_id);
                 $query->where('project_id', $user->project_id);
             })
-            ->where('status', 'on delivery')
+            ->where('transmittal_status', 'on delivery')
             ->orderBy('receipt_no', 'desc')
             ->get();
 
@@ -49,13 +49,13 @@ class DashboardController extends Controller
             ->leftJoin('users AS creators', 'transmittals.user_id', '=', 'creators.id')
             ->select(['transmittals.*', 'projects.project_code', 'receivers.full_name AS receiver_name', 'creators.full_name AS creator_name'])
             ->where('receivers.id', $user->id)
-            ->where('transmittals.status', '=', 'on delivery')
+            ->where('transmittals.transmittal_status', '=', 'on delivery')
             // ->where('receivers.project_id', $user->project_id) // comment to make this transmittal all project
             ->orderBy('transmittals.receipt_no', 'desc')->get();
         $tf_total = Transmittal::where('user_id', auth()->user()->id)->get()->count();
-        $tf_p = Transmittal::where('user_id', auth()->user()->id)->where('status', 'published')->get()->count();
-        $tf_o = Transmittal::where('user_id', auth()->user()->id)->where('status', 'on delivery')->get()->count();
-        $tf_d = Transmittal::where('user_id', auth()->user()->id)->where('status', 'delivered')->get()->count();
+        $tf_p = Transmittal::where('user_id', auth()->user()->id)->where('transmittal_status', 'published')->get()->count();
+        $tf_o = Transmittal::where('user_id', auth()->user()->id)->where('transmittal_status', 'on delivery')->get()->count();
+        $tf_d = Transmittal::where('user_id', auth()->user()->id)->where('transmittal_status', 'delivered')->get()->count();
         $projects = DB::table('projects')
             ->select(
                 'id',
@@ -72,9 +72,14 @@ class DashboardController extends Controller
             )
             ->orderBy('dept_name', 'asc')
             ->get();
-        $deliveryOrders = Delivery::with(['transmittal', 'transmittal.project', 'receiver', 'user'])->where('courier_id', $user->id)
+        $deliveryOrders = Delivery::with(['transmittal', 'transmittal.project', 'receiver', 'user', 'delivery_orders' => function ($query) {
+            $query->orderBy('id', 'desc');
+        }])->where('courier_id', $user->id)
+            ->where('delivery_status', 'opened')
             ->orderBy('id', 'desc')
             ->get();
+        //     ->toSql();
+        // dd($deliveryOrders);
         return view('home', compact('title', 'tfd_subtitle', 'tf_to_dept', 'tf_total', 'tf_p', 'tf_o', 'tf_d', 'projects', 'departments', 'tfu_subtitle', 'tf_to_user', 'deliveryOrders'));
     }
 }

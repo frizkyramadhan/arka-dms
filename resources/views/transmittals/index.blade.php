@@ -54,12 +54,12 @@
                 </td>
                 <td>{{ $transmittal->attn }}</td>
                 <td class="text-center">
-                  @if ($transmittal->status == 'published')
-                  <span class="badge badge-warning">{{ $transmittal->status }}</span>
-                  @elseif ($transmittal->status == 'sent')
-                  <span class="badge badge-info">{{ $transmittal->status }}</span>
-                  @elseif ($transmittal->status == 'closed')
-                  <span class="badge badge-success">{{ $transmittal->status }}</span>
+                  @if ($transmittal->transmittal_status == 'published')
+                  <span class="badge badge-warning">{{ $transmittal->transmittal_status }}</span>
+                  @elseif ($transmittal->transmittal_status == 'sent')
+                  <span class="badge badge-info">{{ $transmittal->transmittal_status }}</span>
+                  @elseif ($transmittal->transmittal_status == 'closed')
+                  <span class="badge badge-success">{{ $transmittal->transmittal_status }}</span>
                   @endif
                 </td>
                 <td class="text-center">
@@ -127,8 +127,8 @@
           , name: 'action'
         }
         , {
-          data: 'status'
-          , name: 'status'
+          data: 'transmittal_status'
+          , name: 'transmittal_status'
           , className: 'text-center'
         }
         , {

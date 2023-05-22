@@ -24,7 +24,7 @@ class CreateTransmittalsTable extends Migration
             $table->foreignId('received_by')->nullable()->references('id')->on('users'); // as origin receiver
             $table->string('to')->nullable();
             $table->string('attn')->nullable();
-            $table->string('status')->nullable();
+            $table->enum('transmittal_status', ['published', 'on delivery', 'delivered', 'cancelled'])->default('published');
             $table->timestamps();
         });
     }

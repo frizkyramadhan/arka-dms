@@ -12,6 +12,7 @@ use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\TransmittalController;
+use App\Http\Controllers\DeliveryOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,9 +57,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('deliveries/send', [DeliveryController::class, 'send'])->name('deliveries.send');
     Route::get('deliveries/receive', [DeliveryController::class, 'receive'])->name('deliveries.receive');
-    Route::get('deliveries/search/{receiptNo}', [DeliveryController::class, 'search']);
+    Route::get('deliveries/searchGet/{receiptNo}', [DeliveryController::class, 'searchGet']);
+    Route::post('deliveries/search', [DeliveryController::class, 'search'])->name('deliveries.search');
     Route::get('deliveries/getRole/{id}', [DeliveryController::class, 'getRole']);
     Route::post('deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
     Route::patch('deliveries/{delivery}', [DeliveryController::class, 'update'])->name('deliveries.update');
     Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy'])->name('deliveries.destroy');
+
+    Route::get('delivery_orders/data', [DeliveryOrderController::class, 'data'])->name('delivery_orders.data');
+    Route::get('delivery_orders/list', [DeliveryOrderController::class, 'getDeliveryOrders'])->name('delivery_orders.list');
+    Route::resource('delivery_orders', DeliveryOrderController::class);
 });

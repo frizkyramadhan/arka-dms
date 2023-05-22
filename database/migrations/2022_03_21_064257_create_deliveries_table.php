@@ -15,7 +15,7 @@ class CreateDeliveriesTable extends Migration
     {
         Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('transmittal_id')->references('id')->on('transmittals');
+            $table->foreignUuid('transmittal_id')->references('id')->on('transmittals')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('delivery_type', ['send', 'receive']); // send or receive
             $table->dateTime('delivery_date', 0);
             $table->foreignId('user_id')->references('id')->on('users'); // as direct sender
@@ -29,7 +29,7 @@ class CreateDeliveriesTable extends Migration
             $table->string('do_no')->nullable();
             $table->text('delivery_remarks')->nullable();
             $table->string('image')->nullable();
-            $table->enum('is_delivered', ['yes', 'no'])->default('no');
+            $table->enum('delivery_status', ['opened', 'closed'])->default('opened');
             $table->timestamps();
         });
     }
