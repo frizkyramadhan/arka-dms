@@ -23,6 +23,14 @@ class AdminUserSeeder extends Seeder
             'department_id' => 7
         ]);
         User::create([
+            'full_name' => '[TO EXTERNAL DELIVERY]',
+            'email' => 'external@arka-dms.dev',
+            'password' => bcrypt('external'),
+            'role' => 'gateway',
+            'project_id' => 1,
+            'department_id' => 7
+        ]);
+        User::create([
             'full_name' => 'Frizky Ramadhan',
             'email' => 'frizky.ramadhan@arka.co.id',
             'password' => bcrypt('user'),

@@ -217,22 +217,6 @@
                               <td>{{ \Carbon\Carbon::parse($deliveryOrder->transport_date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</td>
                               <td><a href="{{ asset('images/'.$delivery->transmittal_id .'/courier/'. $deliveryOrder->transport_image) }}" data-toggle="modal" data-target="#imageDeliveryOrderModal-{{ $deliveryOrder->id }}">{{ $deliveryOrder->transport_image }}</a></td>
                             </tr>
-
-                            <div class="modal fade" tabindex="-1" role="dialog" id="imageDeliveryOrderModal-{{ $deliveryOrder->id }}">
-                              <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                  <div class="modal-body">
-                                    <figure>
-                                      <img src="{{ asset('images/'.$delivery->transmittal_id .'/courier/'.$deliveryOrder->transport_image) }}" class="img-fluid" alt="image">
-                                      <figcaption class="text-center">{{ $deliveryOrder->transport_image }}</figcaption>
-                                    </figure>
-                                  </div>
-                                  <div class="modal-footer bg-whitesmoke br">
-                                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
                             @endforeach
                           </tbody>
                         </table>
@@ -341,14 +325,16 @@
                         <input type="text" class="form-control" name="do_no" value="{{ $delivery->do_no }}">
                       </div>
                     </div>
-                    <div class="form-group">
-                      <div class="control-label">Complete This Delivery?</div>
-                      <label class="custom-switch mt-2">
-                        <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes" {{ $delivery->is_delivered == 'yes' ? 'checked' : null }}>
-                        <span class="custom-switch-indicator"></span>
-                        <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                        <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                      </label>
+                    <div id="complete-section-{{ $delivery->id }}">
+                      <div class="form-group">
+                        <div class="control-label">Complete This Delivery?</div>
+                        <label class="custom-switch mt-2">
+                          <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="delivery_status" class="custom-switch-input" value="closed" {{ $delivery->delivery_status == 'closed' ? 'checked' : null }}>
+                          <span class="custom-switch-indicator"></span>
+                          <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                          <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -413,14 +399,16 @@
                       <input type="file" class="form-control" name="image" id="image-{{ $delivery->id }}" accept=".jpeg, .png, .jpg, .gif, .svg">
                     </div>
                   </div>
-                  <div class="form-group">
-                    <div class="control-label">Complete This Delivery?</div>
-                    <label class="custom-switch mt-2">
-                      <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes" {{ $delivery->is_delivered == 'yes' ? 'checked' : null }}>
-                      <span class="custom-switch-indicator"></span>
-                      <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                      <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                    </label>
+                  <div id="complete-section-{{ $delivery->id }}">
+                    <div class="form-group">
+                      <div class="control-label">Complete This Delivery?</div>
+                      <label class="custom-switch mt-2">
+                        <input id="is-delivered{{ $delivery->id }}" type="checkbox" name="delivery_status" class="custom-switch-input" value="closed" {{ $delivery->delivery_status == 'closed' ? 'checked' : null }}>
+                        <span class="custom-switch-indicator"></span>
+                        <span id="yes{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                        <span id="no{{ $delivery->id }}" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -457,6 +445,24 @@
   </div>
 </div>
 
+@foreach ($delivery->delivery_orders as $deliveryOrder)
+<div class="modal fade" tabindex="-1" role="dialog" id="imageDeliveryOrderModal-{{ $deliveryOrder->id }}" style="z-index: 1051;">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <figure>
+          <img src="{{ asset('images/'.$delivery->transmittal_id .'/courier/'.$deliveryOrder->transport_image) }}" class="img-fluid" alt="image">
+          <figcaption class="text-center">{{ $deliveryOrder->transport_image }}</figcaption>
+        </figure>
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@endforeach
 @endforeach
 @endsection
 
@@ -542,29 +548,42 @@
   });
 
   // on load if courier_id is not null, then show #gateway-section
-  var courier = $('#courier-id-{{ $delivery->id }}').val();
-  if (courier) {
+  var deliver_to = $('#deliver-to-{{ $delivery->id }}').val();
+  console.log(deliver_to);
+  if (deliver_to === '2') {
     $('#gateway-section-{{ $delivery->id }}').show();
+    $('#complete-section-{{ $delivery->id }}').show();
   } else {
-    $('#gateway-section-{{ $delivery->id }}').hide();
+    $('#gateway-section-{{ $delivery->id }}').show();
+    $('#complete-section-{{ $delivery->id }}').hide();
   }
+
+
   $('#deliver-to-{{ $delivery->id }}').change(function() {
-    const deliver_to = $('#deliver-to-{{ $delivery->id }}').val();
-    $.ajax({
-      url: `{{ url('deliveries/getRole/${deliver_to}') }}`
-      , type: "GET"
-      , dataType: "JSON"
-      , success: function(data) {
-        console.log(data);
-        if (data.data.role == 'gateway') {
-          $('#gateway-section-{{ $delivery->id }}').show();
-          $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', false);
-        } else {
-          $('#gateway-section-{{ $delivery->id }}').hide();
-          $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', true);
+    var deliver_to = $('#deliver-to-{{ $delivery->id }}').val();
+    if (deliver_to === '2') {
+      $('#gateway-section-{{ $delivery->id }}').show();
+      $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', false);
+      $('#complete-section-{{ $delivery->id }}').show();
+    } else {
+      $.ajax({
+        url: `{{ url('deliveries/getRole/${deliver_to}') }}`
+        , type: "GET"
+        , dataType: "JSON"
+        , success: function(data) {
+          console.log(data);
+          if (data.data.role == 'gateway') {
+            $('#gateway-section-{{ $delivery->id }}').show();
+            $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', false);
+            $('#complete-section-{{ $delivery->id }}').hide();
+          } else {
+            $('#gateway-section-{{ $delivery->id }}').hide();
+            $('#gateway-section-{{ $delivery->id }} input, #gateway-section-{{ $delivery->id }} select').prop('disabled', true);
+            $('#complete-section-{{ $delivery->id }}').hide();
+          }
         }
-      }
-    });
+      });
+    }
   });
   @endforeach
 

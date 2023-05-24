@@ -118,7 +118,7 @@ class TransmittalController extends Controller
             ->whereHas('department', function ($query) {
                 $query->whereId(request()->input('department_id', 0));
             })
-            // ->where('role', '!=', 'administrator')
+            ->whereNotIn('id', [1, 2])
             ->orderBy('full_name', 'asc')
             ->pluck('full_name', 'id');
 
