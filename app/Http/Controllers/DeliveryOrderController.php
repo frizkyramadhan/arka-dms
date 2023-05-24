@@ -119,6 +119,7 @@ class DeliveryOrderController extends Controller
     {
         $delivery_id = $request->delivery_id;
         $delivery = Delivery::find($delivery_id);
+        $transmittal = Transmittal::where('id', $delivery->transmittal_id)->first();
 
         $data = $request->all();
         $deliveryOrder = new DeliveryOrder();
@@ -129,8 +130,6 @@ class DeliveryOrderController extends Controller
         $deliveryOrder->transport_remarks = $data['transport_remarks'] ?? null;
         // if request has image
         if ($request->hasFile('transport_image')) {
-            // get transmittal by id
-            $transmittal = Transmittal::where('id', $delivery->transmittal_id)->first();
             $directories = Storage::directories('public/images/' . $transmittal->id);
             if (count($directories) == 0) {
                 $path = public_path() . '/images/' . $transmittal->id . '/courier/';
@@ -145,6 +144,10 @@ class DeliveryOrderController extends Controller
         if ($data['transport_status'] == 'delivered' || $data['transport_status'] == 'cancelled' || $data['transport_status'] == 'returned') {
             $delivery->delivery_status = 'closed';
             $delivery->save();
+            // if delivery to external
+            if ($delivery->deliver_to == '2') {
+                Transmittal::where('id', $transmittal->id)->update(['transmittal_status' => 'delivered']);
+            }
         } else {
             $delivery->delivery_status = 'opened';
             $delivery->save();

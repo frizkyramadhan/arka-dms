@@ -79,7 +79,6 @@
                   <div class="form-group">
                     <label>Sent To</label>
                     <select class="custom-select" name="deliver_to" id="deliver-to">
-                      <option value="">-- Select Receiver --</option>
                       @foreach ($receivers as $receiver)
                       <option value="{{ $receiver->id }}" {{ old('deliver_to') == $receiver->id ? 'selected' : null }}>
                         {{ $receiver->full_name }} {{ $receiver->role == 'gateway' ? '[GATEWAY]' : '' }}</option>
@@ -130,14 +129,16 @@
                       <input type="text" class="form-control" name="do_no" value="{{ old('do_no') }}">
                     </div>
                   </div>
-                  <div class="form-group">
-                    <div class="control-label">Complete This Delivery?</div>
-                    <label class="custom-switch mt-2">
-                      <input id="is-delivered" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
-                      <span class="custom-switch-indicator"></span>
-                      <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
-                      <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
-                    </label>
+                  <div id="complete-section">
+                    <div class="form-group">
+                      <div class="control-label">Complete This Delivery?</div>
+                      <label class="custom-switch mt-2">
+                        <input id="is-delivered" type="checkbox" name="delivery_status" class="custom-switch-input" value="closed">
+                        <span class="custom-switch-indicator"></span>
+                        <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
+                        <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -370,7 +371,7 @@
   $('#no').show();
   $('#is-delivered').change(function() {
     if ($(this).is(':checked')) {
-      var confirmMsg = confirm("Klik OK jika pengiriman sudah sampai di tujuan akhir!");
+      var confirmMsg = confirm("Klik OK jika pengiriman ini adalah pengiriman eksternal!");
       if (confirmMsg == true) {
         $('#yes').show();
         $('#no').hide();
@@ -384,24 +385,35 @@
   });
 
   $('#gateway-section').hide();
+  $('#complete-section').hide();
   // if your role = gateway and id deliver-to is selected to user which role = gateway from ajax request then show gateway-section
   $('#deliver-to').change(function() {
     const deliver_to = $('#deliver-to').val();
-    $.ajax({
-      url: `{{ url('deliveries/getRole/${deliver_to}') }}`
-      , type: "GET"
-      , dataType: "JSON"
-      , success: function(data) {
-        console.log(data);
-        if (data.data.role == 'gateway') {
-          $('#gateway-section').show();
-          $('#gateway-section input, #gateway-section select').prop('disabled', false);
-        } else {
-          $('#gateway-section').hide();
-          $('#gateway-section input, #gateway-section select').prop('disabled', true);
+    if (deliver_to === '2') {
+      $('#gateway-section').show();
+      $('#gateway-section input, #gateway-section select').prop('disabled', false);
+      $('#complete-section').show();
+    } else {
+      $.ajax({
+        url: `{{ url('deliveries/getRole/${deliver_to}') }}`
+        , type: "GET"
+        , dataType: "JSON"
+        , success: function(data) {
+          console.log(data);
+          if (data.data.role == 'gateway') {
+            $('#gateway-section').show();
+            $('#gateway-section input, #gateway-section select').prop('disabled', false);
+            $('#complete-section').hide();
+            //$('#complete-section checkbox').prop('disabled', true);
+          } else {
+            $('#gateway-section').hide();
+            $('#gateway-section input, #gateway-section select').prop('disabled', true);
+            $('#complete-section').hide();
+            //$('#complete-section checkbox').prop('disabled', true);
+          }
         }
-      }
-    });
+      });
+    }
   });
 
 </script>

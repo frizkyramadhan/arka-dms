@@ -42,6 +42,7 @@ class DeliveryController extends Controller
 
         // add delivery process
         $data = $request->all();
+        // dd($data);
         $delivery = new Delivery();
         $delivery->transmittal_id = $transmittal_id;
         $delivery->delivery_type = $data['delivery_type'];
@@ -67,15 +68,28 @@ class DeliveryController extends Controller
             $image->move(public_path() . '/images/' . $transmittal->id, $name);
             $delivery->image = $name;
         }
-        // jika delivery type = send maka status = opened
-
-        if ($request->delivery_type == "send") {
-            $delivery->delivery_status = "opened";
-            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
-        } else if ($request->delivery_type == "receive") {
-            $delivery->delivery_status = "closed";
-            if ($transmittal->received_by == $user->id) {
+        // delivery to external
+        if ($delivery->deliver_to == 2) {
+            if ($delivery->delivery_status == "closed") {
+                // barang diambil kurir eksternal
+                $delivery->delivery_status = "closed";
                 Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+            } else {
+                // barang diantar kurir/driver internal
+                $delivery->delivery_status = "opened";
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+            }
+        } else {
+            // delivery to internal
+            // jika delivery type = send maka status = opened
+            if ($request->delivery_type == "send") {
+                $delivery->delivery_status = "opened";
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+            } else if ($request->delivery_type == "receive") {
+                $delivery->delivery_status = "closed";
+                if ($transmittal->received_by == $user->id) {
+                    Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+                }
             }
         }
         $delivery->save();
@@ -146,13 +160,28 @@ class DeliveryController extends Controller
             $image->move(public_path() . '/images/' . $transmittal->id, $name);
             $delivery->image = $name;
         }
-        if ($request->delivery_type == "send") {
-            $delivery->delivery_status = "opened";
-            Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
-        } else if ($request->delivery_type == "receive") {
-            $delivery->delivery_status = "closed";
-            if ($transmittal->received_by == $user->id) {
+        // delivery to external
+        if ($delivery->deliver_to == 2) {
+            if ($delivery->delivery_status == "closed") {
+                // barang diambil kurir eksternal
+                $delivery->delivery_status = "closed";
                 Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+            } else {
+                // barang diantar kurir/driver internal
+                $delivery->delivery_status = "opened";
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+            }
+        } else {
+            // delivery to internal
+            // jika delivery type = send maka status = opened
+            if ($request->delivery_type == "send") {
+                $delivery->delivery_status = "opened";
+                Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'on delivery']);
+            } else if ($request->delivery_type == "receive") {
+                $delivery->delivery_status = "closed";
+                if ($transmittal->received_by == $user->id) {
+                    Transmittal::where('id', $transmittal_id)->update(['transmittal_status' => 'delivered']);
+                }
             }
         }
         $delivery->save();

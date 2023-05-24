@@ -90,7 +90,7 @@
                 </div>
               </div>
               <div class="col-md-6 mb-2">
-                <div class="form-group">
+                {{-- <div class="form-group">
                   <div class="control-label">Complete This Delivery?</div>
                   <label class="custom-switch mt-2">
                     <input id="is-delivered" type="checkbox" name="is_delivered" class="custom-switch-input" value="yes">
@@ -98,7 +98,7 @@
                     <span id="yes" class="custom-switch-description"><span class="badge badge-success">YES</span></span>
                     <span id="no" class="custom-switch-description"><span class="badge badge-danger">NO</span></span>
                   </label>
-                </div>
+                </div> --}}
                 {{-- <div class="form-group">
                     <label>Unit Type <small class="text-danger">*optional</small></label>
                     <select class="custom-select select2" name="unit_id" id="unit_id">
