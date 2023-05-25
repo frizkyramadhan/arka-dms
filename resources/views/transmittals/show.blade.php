@@ -8,7 +8,7 @@
       <a href="{{ url('transmittals') }}" class="btn btn-icon btn-primary"><i class="fas fa-arrow-alt-circle-left"></i>
         Back</a>
       <a href="{{ url('transmittals/' . $transmittal->id . '/edit') }}" title="Edit" class="btn btn-icon icon-left btn-warning"><i class="far fa-edit"></i> Edit</a>
-      {{-- <a href="{{ url('transmittals/email/' . $transmittal->id) }}" title="Email" class="btn btn-icon icon-left btn-light"><i class="far fa-envelope"></i> Email</a> --}}
+      <a href="{{ url('transmittals/email/' . $transmittal->id) }}" title="Email" class="btn btn-icon icon-left btn-light"><i class="far fa-envelope"></i> Email</a>
       <button class="btn btn-success btn-icon icon-left" onclick="printSection()"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>

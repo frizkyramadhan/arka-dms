@@ -205,6 +205,14 @@ class TransmittalController extends Controller
                 );
                 TransmittalDetail::create($details);
             }
+
+            // send email to receiver
+            if ($transmittal->received_by) { // if received by is internal user
+                $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver', 'transmittal_details'])->where('id', $transmittal->id)->first();
+                Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
+                    // ->cc($cc)
+                    ->send(new TransmittalDelivery($transmittals));
+            }
         }
 
         return redirect('transmittals')->with('status', 'Transmittal Form has been added!');
@@ -381,6 +389,14 @@ class TransmittalController extends Controller
             }
         }
 
+        // send email to receiver
+        if ($transmittal->received_by) { // if received by is internal user
+            $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver', 'transmittal_details'])->where('id', $transmittal->id)->first();
+            Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
+                // ->cc($cc)
+                ->send(new TransmittalDelivery($transmittals));
+        }
+
         return redirect('transmittals/' . $transmittal->id)->with('transmittal_status', 'Transmittal Form has been updated!');
     }
 
@@ -469,21 +485,22 @@ class TransmittalController extends Controller
     public function email($id)
     {
         // send email notification to user
-        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver'])->withTrashed()->where('id', $id)->first();
+        $transmittals = Transmittal::with(['project', 'department', 'user', 'receiver', 'transmittal_details'])->where('id', $id)->first();
         $deliveries = Delivery::where('transmittal_id', $id)->latest()->get();
 
-        $cc = [];
-        foreach ($deliveries as $key => $delivery) {
-            $email = [];
-            $email['email'] = $delivery->user->email;
-            $email['name'] = $delivery->user->full_name;
-            $cc[$key] = (object) $email;
-        }
+        // $cc = [];
+        // foreach ($deliveries as $key => $delivery) {
+        //     $email = [];
+        //     $email['email'] = $delivery->user->email;
+        //     $email['name'] = $delivery->user->full_name;
+        //     $cc[$key] = (object) $email;
+        // }
 
         Mail::to($transmittals->receiver->email, $transmittals->receiver->full_name)
-            ->cc($cc)
+            // ->cc($cc)
             ->send(new TransmittalDelivery($transmittals, $deliveries));
-        return new TransmittalDelivery($transmittals, $deliveries);
+        // return new TransmittalDelivery($transmittals, $deliveries);
+        return redirect()->back()->with('transmittal_status', 'Email has been sent successfully!');
     }
 
     // public function trash()

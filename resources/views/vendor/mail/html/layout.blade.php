@@ -1,5 +1,4 @@
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
@@ -7,6 +6,10 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
+  <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
   <style>
     @media only screen and (max-width: 700px) {
       .inner-body {
@@ -38,8 +41,7 @@
           <!-- Email Body -->
           <tr>
             <td class="body" width="100%" cellpadding="0" cellspacing="0">
-              <table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0"
-                role="presentation">
+              <table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
                 <!-- Body content -->
                 <tr>
                   <td class="content-cell">
